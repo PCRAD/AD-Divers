@@ -210,8 +210,12 @@
     });
     animals.replaceChildren(...animalTemplates.slice(0, Math.min(records.length, animalTemplates.length)).map(node => node.cloneNode(true)));
     garden.querySelector(".track span").style.width = `${Math.min(records.length, 100)}%`;
-    garden.querySelector("small").textContent = `${data ? records.length : "—"} / 100 dives · Community milestone`;
-    garden.querySelector("p").textContent = `Our reef grows with every shared dive. Showing up to ${animalTemplates.length} illustrated nudibranchs.`;
+    const progress = garden.querySelector("small");
+    progress.classList.add("garden-progress");
+    progress.textContent = data
+      ? `${records.length} / 100 dives logged · ${records.length >= 100 ? "Goal reached!" : `${100 - records.length} to go!`}`
+      : "Our goal: 100 community dives · Sign in to see our progress.";
+    garden.querySelector("p").textContent = "Our reef grows with every shared dive. Add yours and help us reach our community goal.";
     filterDestinations();
     if (!data) document.getElementById("destination-count").textContent = "Sign in to view community destinations.";
   }
