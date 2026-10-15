@@ -3,1057 +3,744 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#073c43">
-  <title>OneAD Dive Compass — Eat, Sleep, Dive, Repeat!</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <title>OneAD Dive Compass — Eat. Sleep. Dive. Repeat.</title>
   <style>
-    :root {
-      color-scheme: light;
-      --ink: #18344c;
-      --muted: #657f93;
-      --paper: #eaf3f8;
-      --white: #fff;
-      --line: #d5e4ec;
-      --sea: #1f789f;
-      --deep: #0e3556;
-      --lime: #d8f36b;
-      --coral: #f2795b;
-      --serif: "Playfair Display", Georgia, serif;
-      --sans: "DM Sans", "Segoe UI", sans-serif;
-      font-family: var(--sans);
-      color: var(--ink);
-      background: var(--paper);
-      font-synthesis: none;
-      text-rendering: optimizeLegibility;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; min-width: 320px; min-height: 100vh; background-color: var(--paper); background-image: linear-gradient(180deg, #d9eaf3 0, #edf5f9 250px, #e4eff5 100%); }
-    button, input, textarea, select { font: inherit; }
-    button { cursor: pointer; }
-    button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid #a3cb49; outline-offset: 2px; }
-    a { color: inherit; }
-    .app { min-height: 100vh; }
-    .topbar { height: 76px; background: var(--deep); color: white; display: flex; align-items: center; padding: 0 5vw; gap: 38px; position: sticky; top: 0; z-index: 500; }
-    .brand { display: flex; align-items: center; gap: 11px; text-decoration: none; flex: 0 0 auto; }
-    .brand-mark { width: 35px; height: 35px; border: 1px solid rgba(216,243,107,.6); border-radius: 50%; display: grid; place-items: center; color: var(--lime); padding: 4px; }
-    .brand-mark svg { display: block; width: 100%; height: 100%; }
-    .brand-name { font-size: 14px; font-weight: 700; letter-spacing: 1.6px; }
-    .brand-name span { color: var(--lime); }
-    .nav { display: flex; align-items: center; gap: 7px; height: 100%; flex: 1; }
-    .nav button { border: 0; background: transparent; color: #c7d9d5; height: 100%; padding: 0 14px; font-size: 13px; position: relative; white-space: nowrap; }
-    .nav button:hover, .nav button.active { color: white; }
-    .nav button.active::after { content: ""; height: 3px; background: var(--lime); position: absolute; bottom: 0; left: 14px; right: 14px; }
-    .top-actions { display: flex; align-items: center; gap: 17px; }
-    .auth-button { border: 1px solid #7999ad; color: white; background: transparent; padding: 8px 11px; font-size: 11px; font-weight: 700; white-space: nowrap; }
-    .auth-button:hover { border-color: var(--lime); color: var(--lime); }
-    .streak { font-size: 12px; color: #d7e5dd; white-space: nowrap; }
-    .streak b { color: var(--lime); font-weight: 700; }
-    .avatar-button { width: 38px; height: 38px; border: 1px solid rgba(255,255,255,.32); border-radius: 50%; background: #347f9f; padding: 0; overflow: hidden; display: grid; place-items: center; color: white; font-weight: 700; }
-    .avatar-button img { width: 100%; height: 100%; object-fit: cover; }
-    .profile-label { color: #d7e5ed; font-size: 11px; white-space: nowrap; max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
-    main { max-width: 1440px; padding: 28px 5vw 70px; margin: auto; }
-    .page { display: none; animation: arrive .3s ease both; }
-    .page.active { display: block; }
-    @keyframes arrive { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
-    .eyebrow { color: var(--sea); font-size: 10px; text-transform: uppercase; font-weight: 700; letter-spacing: 1.7px; }
-    h1, h2, h3, p { margin-top: 0; }
-    h1, .serif { font-family: var(--serif); font-weight: 500; }
-    .page-heading { display: flex; align-items: end; justify-content: space-between; gap: 22px; margin: 15px 0 25px; }
-    .page-heading h1 { font-size: clamp(32px, 4vw, 47px); line-height: 1.1; margin: 7px 0 0; }
-    .page-heading p { color: var(--muted); margin: 8px 0 0; font-size: 14px; }
-    .button { border: 0; border-radius: 3px; background: var(--sea); color: white; padding: 12px 17px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 9px; transition: background .18s ease, transform .18s ease; }
-    .button:hover { background: var(--deep); transform: translateY(-1px); }
-    .button.light { background: white; color: var(--deep); }
-    .button.light:hover { background: var(--lime); }
-    .button.outline { background: transparent; border: 1px solid var(--line); color: var(--ink); }
-    .button.outline:hover { background: white; border-color: var(--sea); }
-    .icon { display: inline-block; font-size: 16px; line-height: 1; }
-    .hero { min-height: 430px; background: var(--deep); position: relative; display: flex; align-items: end; color: white; overflow: hidden; }
-    .hero-art { position: absolute; top: 0; right: 0; height: 100%; width: auto; max-width: 100%; object-fit: contain; object-position: right center; }
-    .hero::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(4,39,42,.88) 0%, rgba(4,39,42,.58) 48%, rgba(4,39,42,.06) 100%); }
-    .hero-copy { position: relative; z-index: 1; padding: 36px 40px; width: min(660px, 100%); }
-    .hero .eyebrow { color: var(--lime); }
-    .hero h1 { font-size: clamp(36px, 5vw, 61px); line-height: 1.02; margin: 10px 0 12px; }
-    .hero p { color: #e3ece7; font-size: 14px; max-width: 440px; line-height: 1.7; margin-bottom: 19px; }
-    .hero-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 17px; }
-    .text-link { color: white; font-size: 12px; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.55); padding: 5px 0; }
-    .stats { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); background: var(--white); margin: 18px 0 32px; }
-    .stat { min-height: 91px; padding: 18px 22px; border-right: 1px solid var(--line); display: flex; flex-direction: column; justify-content: center; }
-    .stat:last-child { border: 0; }
-    .stat strong { font-family: var(--serif); font-size: 29px; font-weight: 500; line-height: 1.1; }
-    .stat span { color: var(--muted); font-size: 11px; margin-top: 7px; }
-    .section-row { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin: 0 0 15px; }
-    .section-row h2 { font: 500 25px var(--serif); margin: 5px 0 0; }
-    .section-row a, .quiet-link { border: 0; background: transparent; color: var(--sea); text-decoration: none; font-weight: 700; font-size: 12px; padding: 7px 0; }
-    .overview-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 30px; }
-    .challenge { background: linear-gradient(145deg, #0c3654, #174f70); color: white; padding: 22px 24px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 24px; align-items: center; margin-bottom: 30px; }
-    .challenge-label { font-size: 10px; color: var(--lime); text-transform: uppercase; letter-spacing: 1.4px; font-weight: 700; }
-    .challenge h3 { margin: 5px 0 4px; font: 500 21px var(--serif); }
-    .challenge p { margin: 0; color: #c9d9d4; font-size: 11px; }
-    .challenge-count { font: 500 28px var(--serif); white-space: nowrap; }
-    .challenge-count small { color: #b4c9c3; font: 11px var(--sans); }
-    .nudibranch-garden { grid-column: 1 / -1; grid-row: 2; width: 100%; aspect-ratio: 3 / 1; min-width: 0; position: relative; overflow: hidden; background: #0b3553; }
-    .nudibranch-garden svg { display: block; width: 100%; height: 100%; }
-    .nudibranch-progress-label { grid-column: 1 / -1; color: #d3e8f0; font-size: 10px; }
-    .progress-track { height: 5px; background: #31595c; grid-column: 1 / -1; }
-    .progress-track span { display: block; height: 100%; background: var(--lime); transition: width .3s ease; }
-    .recent-list { display: grid; gap: 10px; }
-    .dive-card { background: white; border: 1px solid var(--line); min-height: 140px; display: grid; grid-template-columns: 180px 1fr auto; align-items: center; overflow: hidden; }
-    .dive-photo-button { width: 180px; height: 140px; border: 0; padding: 0; display: block; overflow: hidden; background: #dce9f2; }
-    .dive-thumb { width: 100%; height: 100%; display: block; object-fit: contain; transition: transform .2s ease; }
-    .dive-photo-button:hover .dive-thumb { transform: scale(1.04); }
-    .dive-photo-grid { width: 180px; height: 140px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 2px; overflow: hidden; }
-    .dive-photo-grid.single-photo { width: 100%; height: auto; aspect-ratio: 16 / 9; grid-template-columns: minmax(0, 1fr); }
-    .dive-photo-grid .dive-photo-button { width: auto; height: auto; min-width: 0; min-height: 0; }
-    .photo-dialog { width: min(1100px, calc(100% - 24px)); padding: 10px; background: #103b60; position: relative; }
-    .photo-dialog img { display: block; width: 100%; max-height: 76vh; object-fit: contain; }
-    .photo-viewer-controls { min-height: 38px; display: flex; align-items: center; justify-content: center; gap: 18px; color: white; font-size: 11px; }
-    .photo-viewer-controls button { border: 1px solid #7999ad; color: white; background: transparent; padding: 6px 12px; }
-    .photo-viewer-controls button:disabled { opacity: .4; cursor: default; }
-    .photo-dialog .modal-close { position: absolute; right: 12px; top: 12px; z-index: 1; color: white; background: #103b60cc; }
-    .dive-info { padding: 12px 16px; min-width: 0; }
-    .dive-info h3 { font-size: 14px; margin: 0 0 4px; }
-    .dive-info p { font-size: 11px; color: var(--muted); margin: 0; }
-    .dive-log-actions { display: flex; gap: 6px; margin-top: 7px; }
-    .dive-log-actions button { width: 27px; height: 25px; border: 1px solid var(--line); background: white; color: var(--sea); font-size: 13px; line-height: 1; }
-    .dive-log-actions button:hover { border-color: var(--sea); background: #eaf3fa; }
-    .dive-highlight { border-left: 1px solid var(--line); padding: 0 16px; color: var(--sea); font-size: 11px; max-width: 160px; line-height: 1.45; }
-    .community-strip { border-top: 1px solid var(--line); margin-top: 34px; padding-top: 22px; display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
-    .community-teaser { display: block; border: 0; border-left: 2px solid var(--lime); padding: 7px 14px; color: inherit; text-decoration: none; }
-    .community-teaser:hover { border-left-color: var(--sea); background: #eaf3fa; }
-    .community-teaser small { color: var(--sea); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; }
-    .community-teaser p { font: 500 15px var(--serif); line-height: 1.35; margin: 7px 0 0; }
-    .dive-log-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 12px 0; }
-    .dive-log-filters label { display: grid; gap: 5px; color: var(--muted); font-size: 10px; font-weight: 700; }
-    .dive-log-filters input, .dive-log-filters select { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--line); background: white; color: var(--ink); font-size: 12px; }
-    .dive-log-list { display: grid; border-top: 1px solid var(--line); }
-    .dive-log-row { display: grid; grid-template-columns: 180px minmax(130px, 1fr) minmax(110px, .8fr) minmax(90px, .7fr) auto; gap: 14px; align-items: center; text-align: left; border-bottom: 1px solid var(--line); padding: 12px 8px; color: var(--ink); }
-    .dive-log-row strong { font-size: 12px; }
-    .dive-log-row span { color: var(--muted); font-size: 11px; }
-    .dive-site-marker { display: inline-block; width: 22px; height: 15px; margin-right: 8px; vertical-align: -2px; border: 1px solid white; background: linear-gradient(135deg, #df3d3d 0 40%, #fff 41% 59%, #df3d3d 60% 100%); box-shadow: 0 1px 3px #103b6055; }
-    .dive-log-no-photo { width: 180px; height: 140px; display: grid; place-items: center; background: #dce9f2; color: var(--muted); font-size: 10px; }
-    .community-layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 26px; }
-    .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 17px; }
-    .filter-chip { border: 1px solid var(--line); background: white; padding: 8px 12px; font-size: 11px; color: var(--muted); }
-    .filter-chip.active { background: var(--deep); color: white; border-color: var(--deep); }
-    .question-list { display: grid; gap: 10px; }
-    .question-card { background: white; border: 1px solid var(--line); padding: 18px 20px; }
-    .question-meta { color: var(--sea); text-transform: uppercase; letter-spacing: 1px; font-size: 9px; font-weight: 700; }
-    .question-card h3 { font: 500 19px var(--serif); margin: 8px 0; }
-    .question-card p { color: var(--muted); font-size: 12px; line-height: 1.65; margin: 0; }
-    .question-foot { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); padding-top: 12px; margin-top: 14px; color: var(--muted); font-size: 10px; }
-    .vote { border: 0; color: var(--sea); background: transparent; font-weight: 700; padding: 5px; }
-    .side-panel { background: #e7f0f6; padding: 21px; }
-    .side-panel h3 { font: 500 20px var(--serif); margin: 5px 0 10px; }
-    .side-panel p { color: #637772; font-size: 12px; line-height: 1.65; }
-    .side-panel .button { width: 100%; margin-top: 4px; }
-    .refresher-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(240px, .65fr); gap: 24px; }
-    .lesson-list { border-top: 1px solid var(--line); }
-    .lesson { background: white; border-bottom: 1px solid var(--line); }
-    .lesson-toggle { width: 100%; border: 0; background: white; padding: 18px 17px; display: grid; grid-template-columns: 38px 1fr 24px; text-align: left; align-items: center; gap: 13px; }
-    .lesson-number { width: 34px; height: 34px; background: #e5eff6; color: var(--sea); display: grid; place-items: center; font: 500 16px var(--serif); }
-    .lesson-title { font-size: 13px; font-weight: 700; }
-    .lesson-title small { display: block; font-size: 10px; color: var(--muted); font-weight: 400; margin-top: 4px; }
-    .lesson-arrow { color: var(--sea); font-size: 17px; text-align: center; }
-    .lesson-body { display: none; padding: 0 22px 20px 68px; }
-    .lesson.open .lesson-body { display: block; }
-    .lesson-body p { color: var(--muted); font-size: 12px; line-height: 1.7; }
-    .quiz { background: var(--deep); color: white; padding: 24px; }
-    .quiz .eyebrow { color: var(--lime); }
-    .quiz h3 { font: 500 23px var(--serif); margin: 9px 0; }
-    .quiz p { color: #c7d8d1; font-size: 12px; line-height: 1.6; }
-    .quiz button { width: 100%; border: 1px solid #819a8e; color: white; background: transparent; text-align: left; padding: 11px 12px; margin-top: 8px; font-size: 11px; }
-    .quiz button:hover { border-color: var(--lime); color: var(--lime); }
-    .quiz-feedback { font-size: 11px; margin-top: 12px; min-height: 17px; color: var(--lime); }
-    .shop-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
-    .product { background: white; border: 1px solid var(--line); }
-    .product-art { height: 180px; background: #e0edf4; overflow: hidden; }
-    .product-photo-grid { width: 100%; height: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 2px; }
-    .product-photo-button { min-width: 0; min-height: 0; border: 0; padding: 0; overflow: hidden; background: #dce9f2; }
-    .product-photo-button img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .2s ease; }
-    .product-photo-button:hover img { transform: scale(1.04); }
-    .product-placeholder { width: 100%; height: 100%; display: grid; place-items: center; }
-    .photo-preview-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-    .photo-preview-grid img { width: 52px; height: 52px; object-fit: cover; border: 1px solid var(--line); }
-    .product-info { padding: 15px; }
-    .product-info small { color: var(--sea); text-transform: uppercase; letter-spacing: .9px; font-size: 9px; font-weight: 700; }
-    .product-info h3 { font: 500 18px var(--serif); margin: 6px 0; }
-    .product-info p { color: var(--muted); font-size: 11px; margin: 0; }
-    .product-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 13px; font-size: 13px; font-weight: 700; }
-    .product-bottom button { border: 0; background: transparent; color: var(--sea); font-size: 11px; font-weight: 700; padding: 6px 0; }
-    .shop-note { background: #eaf0e9; margin-top: 22px; padding: 16px 19px; color: #637772; font-size: 11px; line-height: 1.6; }
-    dialog { border: 0; padding: 0; width: min(520px, calc(100% - 28px)); max-height: 90vh; box-shadow: 0 18px 70px #082d2d44; }
-    dialog::backdrop { background: rgba(6,35,38,.65); }
-    .modal-head { display: flex; justify-content: space-between; align-items: start; padding: 20px 23px 14px; border-bottom: 1px solid var(--line); }
-    .modal-head h2 { font: 500 25px var(--serif); margin: 4px 0 0; }
-    .modal-close { border: 0; background: transparent; color: var(--muted); font-size: 22px; padding: 0 3px; }
-    .modal-form { padding: 19px 23px 23px; display: grid; gap: 13px; }
-    .field { display: grid; gap: 6px; }
-    .field[hidden] { display: none; }
-    .field label { font-size: 10px; font-weight: 700; color: #546d67; }
-    .field input, .field textarea, .field select { border: 1px solid #dce5dd; background: #fbfcfa; padding: 11px; color: var(--ink); font-size: 12px; width: 100%; }
-    .field textarea { min-height: 78px; resize: vertical; }
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .file-label { border: 1px dashed #a8beb2; background: #f5f8f4; color: var(--sea); padding: 12px; font-size: 11px; display: flex; gap: 9px; align-items: center; cursor: pointer; }
-    .file-label input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-    .file-name { color: var(--muted); font-size: 10px; }
-    .form-actions { display: flex; justify-content: end; gap: 9px; margin-top: 5px; }
-    .toast { position: fixed; z-index: 1000; right: 22px; bottom: 22px; background: var(--deep); color: white; padding: 13px 18px; font-size: 12px; box-shadow: 0 4px 18px #073c4333; transform: translateY(10px); opacity: 0; transition: .2s; pointer-events: none; }
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .empty-state { padding: 32px; color: var(--muted); text-align: center; background: white; font-size: 12px; }
-    .footer { border-top: 1px solid var(--line); padding-top: 17px; margin-top: 35px; display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; }
-    @media (max-width: 900px) {
-      .topbar { gap: 15px; padding: 0 20px; }
-      .nav { gap: 0; overflow-x: auto; }
-      .nav button { padding: 0 10px; font-size: 11px; }
-      .nav button.active::after { left: 10px; right: 10px; }
-      .streak { display: none; }
-      main { padding-left: 24px; padding-right: 24px; }
-      .overview-grid { grid-template-columns: minmax(0,1fr); gap: 17px; }
-      .dive-card { grid-template-columns: 145px 1fr; }
-      .dive-photo-button { width: 145px; height: 112px; }
-      .dive-photo-grid { width: 145px; height: 112px; }
-      .dive-highlight { display: none; }
-    }
-    @media (max-width: 650px) {
-      .topbar { height: auto; min-height: 66px; flex-wrap: wrap; padding: 0 15px; gap: 0 12px; }
-      .brand { min-height: 62px; }
-      .top-actions { margin-left: auto; }
-      .nav { order: 3; flex-basis: 100%; height: 42px; margin: 0 -2px; }
-      .nav button { height: 42px; padding: 0 10px; }
-      main { padding: 20px 15px 45px; }
-      .page-heading { align-items: start; flex-direction: column; margin-bottom: 18px; }
-      .page-heading .button { align-self: stretch; }
-      .hero { min-height: 0; flex-direction: column; align-items: stretch; padding-top: 240px; }
-      .hero-art { height: 240px; max-width: none; }
-      .hero::before { inset: 0 0 auto; height: 240px; background: linear-gradient(180deg, transparent 68%, rgba(4,39,42,.28)); }
-      .hero-copy { width: 100%; padding: 24px 18px; background: var(--deep); }
-      .hero h1 { font-size: 43px; }
-      .hero p { font-size: 12px; }
-      .stats { grid-template-columns: repeat(2,1fr); margin: 12px 0 26px; }
-      .stat { min-height: 78px; padding: 13px 16px; border-bottom: 1px solid var(--line); }
-      .stat:nth-child(2) { border-right: 0; }
-      .stat:nth-child(3), .stat:nth-child(4) { border-bottom: 0; }
-      .stat strong { font-size: 25px; }
-      .overview-grid, .community-layout, .refresher-grid { grid-template-columns: 1fr; }
-      .overview-grid { gap: 27px; }
-      .challenge { padding: 18px; }
-      .nudibranch-garden { grid-column: 1 / -1; grid-row: auto; width: 100%; aspect-ratio: 2 / 1; justify-self: stretch; }
-      .dive-card { grid-template-columns: 110px 1fr; min-height: 92px; }
-      .dive-photo-button { width: 110px; height: 92px; }
-      .dive-photo-grid { width: 110px; height: 92px; }
-      .dive-info { padding: 10px 12px; }
-      .community-strip { grid-template-columns: 1fr; gap: 6px; margin-top: 26px; }
-      .dive-log-filters { grid-template-columns: 1fr; }
-      .dive-log-row { grid-template-columns: 110px minmax(0, 1fr) auto; gap: 8px; }
-      .dive-log-row .dive-log-date { display: none; }
-      .dive-log-no-photo { width: 110px; height: 92px; }
-      .dive-log-row .dive-photo-grid { width: 110px; height: 92px; }
-      .dive-log-row .dive-photo-grid.single-photo { height: auto; aspect-ratio: 16 / 9; }
-      .shop-grid { grid-template-columns: 1fr 1fr; gap: 9px; }
-      .product-art { height: 135px; }
-      .product-info { padding: 11px; }
-      .product-info h3 { font-size: 16px; }
-      .field-row { grid-template-columns: 1fr; }
-      .footer { flex-direction: column; gap: 7px; }
-    }
-    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+    :root { --navy:#102c37; --muted:#667c82; --teal:#197a76; --cream:#f5f5ef; --line:#dce4df; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--cream); color:var(--navy); font-family:"Segoe UI",Arial,sans-serif; }
+    button,a { -webkit-tap-highlight-color:transparent; }
+    button { font:inherit; cursor:pointer; }
+    a { color:inherit; }
+    button:focus-visible,a:focus-visible { outline:3px solid #d99f40; outline-offset:5px; }
+    [hidden] { display:none !important; }
+    .preview { background:#dcece6; text-align:center; padding:9px 20px; font-size:11px; letter-spacing:.4px; }
+    header { background:var(--navy); color:white; }
+    .nav { max-width:1240px; margin:auto; min-height:82px; display:flex; align-items:center; gap:44px; padding:16px 32px; }
+    .brand { display:flex; align-items:center; gap:12px; text-decoration:none; }
+    .mark { border:1px solid #7db2aa; border-radius:50%; height:38px; width:38px; display:grid; place-items:center; font-size:25px; color:#b5ded0; }
+    .brand small { display:block; color:#b0c4c5; letter-spacing:3px; font-size:8px; margin-bottom:4px; }
+    .brand strong { font-size:15px; letter-spacing:1px; }
+    nav { display:flex; gap:26px; flex:1; }
+    nav button { border:0; padding:10px 0; background:none; color:#bcd0d1; font-size:12px; }
+    nav button[aria-current="page"] { color:white; border-bottom:2px solid #a6d3ba; }
+    .member { display:flex; align-items:center; gap:10px; font-size:12px; }
+    .avatar { border-radius:50%; background:#c6d9c9; color:var(--navy); width:35px; height:35px; display:grid; place-items:center; font-family:Georgia,serif; font-size:20px; }
+    main { max-width:1240px; padding:30px 32px 55px; margin:auto; }
+    .hero { position:relative; min-height:450px; border-radius:7px; overflow:hidden; background:#154f62; color:white; display:flex; align-items:center; }
+    .hero img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:80% center; }
+    .hero::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(4,34,45,.95),rgba(4,34,45,.65) 50%,rgba(4,34,45,.1)); }
+    .hero-copy { z-index:1; position:relative; padding:48px; max-width:650px; }
+    .eyebrow { font-size:10px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--teal); }
+    .hero .eyebrow { color:#b3decf; }
+    h1,h2,h3,p { margin-top:0; }
+    h1,h2 { font-family:Georgia,"Times New Roman",serif; font-weight:400; }
+    h1 { font-size:clamp(38px,5vw,62px); letter-spacing:-2px; line-height:1.08; margin:19px 0; }
+    .hero p { color:#d0e1e4; font-size:14px; line-height:1.85; max-width:390px; }
+    .actions { display:flex; align-items:center; gap:22px; flex-wrap:wrap; margin-top:28px; }
+    .button { border:0; padding:13px 21px; border-radius:4px; background:var(--teal); color:white; font-size:12px; font-weight:600; }
+    .button.pale { background:#d6e8c8; color:var(--navy); }
+    .text-button { padding:8px 0; background:none; border:0; color:inherit; font-size:12px; }
+    .hero-caption { position:absolute; right:24px; bottom:23px; z-index:1; font-size:10px; color:#e4eeed; letter-spacing:1px; }
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); padding:25px 0; border-bottom:1px solid var(--line); margin-bottom:35px; }
+    .stat { display:flex; align-items:center; justify-content:center; gap:15px; border-right:1px solid var(--line); }
+    .stat:last-child { border:0; }
+    .stat strong { font:33px Georgia,serif; }
+    .stat span { color:var(--muted); font-size:11px; line-height:1.6; }
+    .heading { display:flex; justify-content:space-between; align-items:end; gap:16px; margin:28px 0 19px; }
+    h2 { font-size:29px; letter-spacing:-.5px; margin:7px 0 0; }
+    .heading .text-button { color:var(--teal); }
+    .cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
+    .card { border:1px solid var(--line); border-radius:7px; overflow:hidden; background:#fff; }
+    .card img { display:block; width:100%; height:205px; object-fit:cover; background:#275a68; }
+    .card-body { padding:19px; }
+    .card h3 { font:23px Georgia,serif; margin:7px 0; }
+    .card p { color:var(--muted); font-size:12px; line-height:1.7; margin-bottom:13px; }
+    .meta { display:flex; justify-content:space-between; color:var(--muted); font-size:10px; border-top:1px solid #edf0ec; padding-top:13px; }
+    .split { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin:30px 0; }
+    .destination { background:#e2ece5; border:1px solid #d4e1d8; border-radius:7px; padding:28px; position:relative; overflow:hidden; min-height:240px; }
+    .destination h2 { max-width:290px; position:relative; z-index:1; }
+    .destination p { font-size:12px; color:var(--muted); max-width:270px; line-height:1.7; }
+    .map { position:absolute; width:310px; right:-5px; bottom:10px; opacity:.65; }
+    .garden { border-radius:7px; padding:28px; background:var(--navy); color:#fff; }
+    .garden .eyebrow { color:#b7d7c5; }
+    .garden h2 { font-size:25px; }
+    .garden p { font-size:12px; color:#bacdcb; line-height:1.7; }
+    .reef-scene { display:block; width:100%; height:auto; margin:18px 0; border-radius:4px; border:1px solid #31535a; }
+    .split > .destination { display:flex; flex-direction:column; }
+    .split > .destination .map { position:static; width:100%; max-width:440px; margin:auto auto 0; opacity:.85; }
+    .split > .destination .text-button { align-self:flex-start; position:relative; z-index:1; }
+    .track { height:4px; background:#35515a; border-radius:5px; margin-bottom:10px; }
+    .track span { display:block; width:38%; height:100%; background:#c4dfac; }
+    .garden small { font-size:10px; color:#c1d5d2; }
+    .learning { background:#fff; padding:24px; border:1px solid var(--line); border-radius:7px; text-align:left; color:inherit; width:100%; }
+    .learning .number { color:var(--teal); font:25px Georgia,serif; display:block; margin-bottom:20px; }
+    .learning h3 { font-size:14px; margin-bottom:9px; }
+    .learning p { font-size:12px; color:var(--muted); line-height:1.7; margin-bottom:18px; }
+    .learning small { color:var(--teal); font-size:10px; }
+    footer { border-top:1px solid var(--line); margin-top:40px; padding-top:20px; display:flex; justify-content:space-between; gap:16px; color:var(--muted); font-size:10px; line-height:1.7; }
+    .knowledge-hero { background:#e2ece5; border-radius:7px; padding:40px; display:grid; grid-template-columns:1.7fr 1fr; gap:35px; }
+    .knowledge-hero h1 { font-size:48px; margin:15px 0; }
+    .knowledge-hero p { max-width:570px; color:#4e6b70; line-height:1.8; font-size:13px; }
+    .note { padding:22px; background:#ffffffa6; border:1px solid #cdded2; border-radius:5px; align-self:center; }
+    .note h3 { font-size:13px; }
+    .note p { font-size:12px; margin-bottom:0; }
+    .tabs { display:flex; flex-wrap:wrap; gap:10px; margin:27px 0; }
+    .tabs button { border:1px solid #cfdcd5; border-radius:30px; padding:10px 18px; background:transparent; font-size:12px; color:#516d70; }
+    .tabs button[aria-pressed="true"] { background:var(--navy); color:#fff; border-color:var(--navy); }
+    .hub { display:grid; grid-template-columns:minmax(0,2.4fr) minmax(240px,1fr); gap:25px; }
+    .modules { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .module { background:#fff; border:1px solid var(--line); border-radius:6px; padding:25px; }
+    .module .topic { display:flex; justify-content:space-between; color:var(--muted); font-size:10px; margin-bottom:23px; }
+    .module h3 { font:23px Georgia,serif; margin-bottom:12px; }
+    .module p { color:var(--muted); font-size:12px; line-height:1.8; }
+    .module details { font-size:12px; line-height:1.9; border-top:1px solid var(--line); padding-top:14px; }
+    summary { cursor:pointer; color:var(--teal); font-weight:600; }
+    .module details p { margin-top:15px; }
+    aside .garden { margin-bottom:16px; }
+    .sources { background:#eeeee6; padding:24px; border-radius:6px; font-size:12px; line-height:1.8; }
+    .sources h3 { font-size:14px; }
+    .sources a { display:block; color:var(--teal); margin-top:10px; }
+    #notice { background:#e1ece4; padding:12px 20px; border-radius:5px; font-size:12px; margin-bottom:18px; }
+    body { background:#f7f5ef; }
+    .preview { background:#dce8e1; font-size:10px; }
+    .nav { min-height:88px; }
+    .mark { border:0; }
+    .mark svg { width:38px; height:38px; }
+    .hero { min-height:550px; border-radius:2px; }
+    .hero-copy { max-width:760px; padding:58px; }
+    .hero h1 { font-size:clamp(40px,5.4vw,72px); line-height:1.05; letter-spacing:-2.7px; }
+    .hero p { max-width:425px; }
+    .hero-caption { left:58px; right:auto; display:flex; gap:18px; font-size:9px; letter-spacing:.8px; }
+    .edition { display:flex; justify-content:space-between; gap:15px; padding:0 0 17px; color:#607778; font-size:9px; letter-spacing:1.6px; text-transform:uppercase; }
+    .stats { padding:26px 0; margin-bottom:45px; }
+    .heading { margin-top:38px; }
+    .story-grid { display:grid; grid-template-columns:1.6fr 1fr; grid-template-rows:1fr 1fr; gap:20px; }
+    .story-grid .card { border-radius:3px; }
+    .story-grid .card:first-child { grid-row:span 2; position:relative; min-height:470px; background:#123b43; }
+    .story-grid .card:first-child img { height:100%; position:absolute; inset:0; }
+    .story-grid .card:first-child::after { content:""; position:absolute; inset:0; background:linear-gradient(0deg,#082b34f5,transparent 85%); }
+    .story-grid .card:first-child .card-body { position:absolute; z-index:1; bottom:0; padding:30px; color:white; width:100%; }
+    .story-grid .card:first-child .eyebrow { color:#b9e4d0; }
+    .story-grid .card:first-child h3 { font-size:34px; }
+    .story-grid .card:first-child p,.story-grid .card:first-child .meta { color:#d3e4df; }
+    .story-grid .card:first-child .meta { border-color:#ffffff30; }
+    .story-grid .card:not(:first-child) { display:grid; grid-template-columns:40% 60%; }
+    .story-grid .card:not(:first-child) img { height:100%; min-height:225px; }
+    .story-grid .card:not(:first-child) h3 { font-size:24px; }
+    .story-link { border:0; background:none; padding:0; text-align:left; font:inherit; color:inherit; cursor:pointer; }
+    .story-link::after { content:" ↗"; font-family:"Segoe UI",sans-serif; font-size:18px; }
+    .journal-row { display:grid; grid-template-columns:1fr 1fr; gap:45px; margin:45px 0; padding:30px 0; border-block:1px solid var(--line); }
+    .journal-row h2 { margin-bottom:20px; }
+    .activity { display:flex; align-items:start; gap:13px; padding:15px 0; border-bottom:1px solid var(--line); }
+    .activity:last-child { border:0; }
+    .activity p { margin:0; font-size:12px; line-height:1.7; }
+    .activity small { color:var(--muted); font-size:10px; }
+    .activity .avatar { flex-shrink:0; width:30px; height:30px; font-size:15px; }
+    .dispatch { padding:30px; background:#e7eae0; position:relative; overflow:hidden; }
+    .dispatch h2 { font-size:33px; max-width:320px; }
+    .dispatch p { max-width:310px; color:#536e70; font-size:13px; line-height:1.8; }
+    .dispatch .ring { position:absolute; right:-95px; bottom:-110px; width:310px; height:310px; border:1px solid #b8cbbc; border-radius:50%; box-shadow:0 0 0 22px #e7eae0,0 0 0 23px #c5d2c4,0 0 0 47px #e7eae0,0 0 0 48px #d0d9cc; pointer-events:none; }
+    .dispatch .button { position:relative; }
+    .split { grid-template-columns:1fr 1fr; margin-top:38px; }
+    .garden h2 { font-size:24px; }
+    .learning { border-radius:3px; transition:transform .2s,border-color .2s; }
+    .learning:hover { transform:translateY(-4px); border-color:#81a69c; }
+    .knowledge-hero { background:var(--navy); color:white; position:relative; overflow:hidden; border-radius:3px; }
+    .knowledge-hero .eyebrow { color:#b9dcc5; }
+    .knowledge-hero p { color:#d1dfdc; }
+    .knowledge-hero .note { background:#ffffff09; border-color:#ffffff30; }
+    .knowledge-hero .button { background:#d6e8c8; color:#102c37; }
+    .module { border-radius:3px; border-top:3px solid #9abbb0; }
+    .module:nth-child(2n) { border-top-color:#d1ad86; }
+    .module .topic { font-size:9px; letter-spacing:1px; }
+    .module h3 { font-size:27px; }
+    .hub-intro { display:flex; justify-content:space-between; gap:15px; margin:0 0 22px; color:var(--muted); font-size:11px; }
+    .editor-note { color:var(--muted); font-size:11px; line-height:1.8; margin-top:20px; }
+    .topic-library { display:grid; gap:32px; }
+    .topic-category h2 { font:28px Georgia,serif; margin:0 0 8px; }
+    .topic-category > p { color:var(--muted); font-size:13px; margin:0 0 16px; line-height:1.6; }
+    .topic-category-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .topic-card { background:white; border:1px solid var(--line); border-radius:4px; padding:18px; text-align:left; color:var(--navy); display:grid; grid-template-columns:minmax(0,1fr) 76px; align-items:center; gap:14px; }
+    .topic-card-copy { display:grid; gap:10px; }
+    .topic-picture { width:76px; height:90px; border-radius:5px; background:#103c4b; }
+    .topic-card:hover { border-color:var(--teal); }
+    .topic-card strong { font:20px Georgia,serif; line-height:1.35; }
+    .topic-card-copy > span:last-child { font-size:11px; color:var(--muted); }
+    .topic-article { background:#fff; padding:32px; border:1px solid var(--line); border-radius:4px; }
+    .topic-article h2 { font-size:34px; line-height:1.2; margin:16px 0 25px; overflow-wrap:anywhere; }
+    .topic-article h3 { font:23px Georgia,serif; margin:28px 0 13px; }
+    .topic-article p { font-size:15px; line-height:1.9; color:#3e5961; }
+    .topic-article .topic-intro { font-size:17px; color:var(--navy); }
+    .topic-article .topic-prompt { background:#e7eee5; padding:20px; }
+    .topic-article .editor-note { font-size:11px; }
+    .topic-sources { display:grid; gap:12px; margin:22px 0; font-size:12px; line-height:1.7; overflow-wrap:anywhere; }
+    .topic-sources a { color:var(--teal); }
+    @media(max-width:1100px) { .topic-category-grid { grid-template-columns:1fr; } }
+    @media(max-width:600px) { .topic-article { padding:22px; } }
+    .reef-quiz { padding:26px; margin-top:28px; border:1px solid #c7d9cb; background:#e5ede2; border-radius:4px; }
+    .reef-quiz h3 { font:24px Georgia,serif; margin:16px 0; }
+    .quiz-options { display:grid; gap:10px; }
+    .quiz-option { padding:14px; background:#fff; border:1px solid #bccfc4; border-radius:3px; color:var(--navy); text-align:left; font-size:13px; line-height:1.6; }
+    .quiz-option:disabled { cursor:default; opacity:1; }
+    .quiz-option.correct { background:#cfe4cd; border-color:#467343; }
+    .quiz-option.incorrect { background:#f2ddd2; border-color:#a15e43; }
+    .quiz-feedback { font-size:13px; line-height:1.8; margin:17px 0; }
+    dialog { border:1px solid var(--line); border-radius:5px; padding:35px; max-width:580px; width:calc(100% - 36px); background:var(--cream); color:var(--navy); }
+    dialog::backdrop { background:#082b35b8; }
+    dialog h2 { margin-bottom:18px; }
+    dialog p { font-size:14px; line-height:1.9; color:#536e70; }
+    .explorer-heading { padding:30px 0; max-width:700px; }
+    .explorer-heading h1 { font-size:48px; }
+    .explorer-heading p { color:var(--muted); font-size:14px; line-height:1.8; }
+    .world-panel { border:1px solid #ccdedb; border-radius:5px; padding:22px; background:#e0edeb; }
+    .world-panel svg { width:100%; height:auto; display:block; }
+    .world-panel .land { fill:#a9c4b9; stroke:#e0edeb; stroke-width:2; }
+    .world-panel .grid { stroke:#b7ceca; stroke-width:1; fill:none; }
+    .world-panel [role="button"] { cursor:pointer; outline:none; }
+    .dive-flag { fill:#cb3e42; stroke:white; stroke-width:2; }
+    .world-panel [role="button"][aria-pressed="true"] .dive-flag,
+    .world-panel [role="button"]:focus .dive-flag { stroke:#102c37; stroke-width:4; }
+    .world-panel [role="button"][aria-pressed="true"] use,
+    .world-panel [role="button"]:focus use { filter:drop-shadow(0 0 3px #102c37); }
+    .wheel-panel { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:center; gap:40px; padding:35px; margin-top:36px; background:#102f3d; color:#fff; border-radius:7px; }
+    .wheel-panel h2 { font:38px Georgia,serif; margin:12px 0; }
+    .wheel-panel p { line-height:1.8; font-size:14px; }
+    .wheel-panel .eyebrow,.wheel-panel .editor-note { color:#bbd5d0; }
+    .wheel-stage { position:relative; width:100%; max-width:380px; margin:auto; }
+    .wheel-stage::after { content:""; position:absolute; top:-5px; left:calc(50% - 12px); border-left:12px solid transparent; border-right:12px solid transparent; border-top:28px solid #eaca85; }
+    #dive-wheel { display:block; width:100%; overflow:visible; }
+    #wheel-result { min-height:110px; border-top:1px solid #577078; margin-top:22px; padding-top:18px; }
+    #wheel-result strong { display:block; font:27px Georgia,serif; color:#eaca85; }
+    #wheel-spin:disabled { opacity:.6; cursor:wait; }
+    @media(max-width:700px) { .wheel-panel { grid-template-columns:1fr; padding:24px; gap:24px; } }
+    .world-panel text { font:13px "Segoe UI",sans-serif; fill:#102c37; paint-order:stroke; stroke:#e0edeb; stroke-width:4px; stroke-linejoin:round; }
+    .map-caption { font-size:11px; color:#47676b; margin:15px 0 0; line-height:1.7; }
+    .result-count { color:var(--muted); font-size:12px; margin-bottom:20px; }
+    .destination-card { border:1px solid var(--line); background:white; padding:22px; border-radius:3px; }
+    .destination-card h3 { font:25px Georgia,serif; }
+    .destination-card p { color:var(--muted); font-size:13px; line-height:1.8; }
+    .community-layout { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:24px; }
+    .community-thread { background:white; border:1px solid var(--line); padding:24px; border-radius:5px; margin-bottom:16px; }
+    .community-thread h3,.gear-card h3 { font:25px Georgia,serif; margin:13px 0; }
+    .community-thread p,.gear-card p,.community-note p { font-size:13px; line-height:1.8; color:var(--muted); }
+    .community-thread summary,.gear-card summary { cursor:pointer; font-size:12px; font-weight:600; color:var(--teal); }
+    .sample-reply { margin-top:16px; padding:2px 16px; border-left:3px solid #c9dbc6; background:#f3f6ef; }
+    .community-note { padding:25px; background:#e2ece5; border-radius:5px; align-self:start; }
+    .community-note h3 { font:26px Georgia,serif; }
+    .gear-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
+    .gear-card { border:1px solid var(--line); background:#fff; padding:24px; border-radius:5px; }
+    .gear-art { width:76px; height:90px; float:right; margin:0 0 12px 12px; border-radius:5px; }
+    .gear-card details { clear:both; }
+    .community-thread,.gear-card { overflow-wrap:anywhere; }
+    .community-composer { margin:18px 0 24px; padding:20px; border:1px solid var(--line); background:#eaf0e7; border-radius:5px; }
+    .community-composer > summary { cursor:pointer; color:var(--teal); font-weight:600; }
+    .community-form { display:grid; gap:14px; margin-top:18px; }
+    .community-form label { display:grid; gap:7px; font-size:13px; font-weight:600; }
+    .community-form input,.community-form textarea,.community-form select { width:100%; min-width:0; padding:12px; border:1px solid #a8c0b9; border-radius:4px; background:white; color:var(--navy); font:14px "Segoe UI",sans-serif; }
+    .community-form textarea { min-height:110px; resize:vertical; }
+    .community-form .button { justify-self:start; }
+    .community-pagination { display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin:22px 0 32px; }
+    .community-pagination button:disabled { opacity:.45; cursor:default; }
+    @media(max-width:700px) { .community-layout,.gear-grid { grid-template-columns:1fr; } }
+    @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; } }
+    @media(max-width:850px) { .nav { gap:20px; flex-wrap:wrap; } nav { order:3; flex-basis:100%; } .member { margin-left:auto; } .hero-copy { padding:35px; } .hub,.knowledge-hero { grid-template-columns:1fr; } .map { opacity:.25; } .story-grid { grid-template-columns:1fr; grid-template-rows:auto; } .story-grid .card:first-child { grid-row:auto; } .journal-row { gap:22px; } .hero-caption { left:35px; } }
+    @media(max-width:600px) { main { padding:18px 18px 35px; } .nav { padding:18px; } nav { gap:20px; overflow:auto; } .hero { min-height:480px; } .hero-copy { padding:26px; } .hero-caption { display:none; } .cards,.split,.modules,.journal-row { grid-template-columns:1fr; } .stat { flex-direction:column; gap:4px; text-align:center; } .stat strong { font-size:27px; } .knowledge-hero { padding:26px; } .knowledge-hero h1 { font-size:39px; } footer { flex-direction:column; } .edition { font-size:8px; letter-spacing:.5px; } .story-grid .card:first-child { min-height:420px; } .story-grid .card:not(:first-child) { grid-template-columns:1fr; } .story-grid .card:not(:first-child) img { height:180px; min-height:0; } .hub-intro { flex-direction:column; } }
+    .connected-form { display:grid; gap:15px; }
+    .connected-form label { display:grid; gap:6px; font-size:13px; }
+    .connected-form input { width:100%; padding:11px; font:inherit; }
+    .connected-form textarea,.connected-form select { width:100%; padding:11px; font:inherit; }
+    .connected-form textarea { min-height:100px; resize:vertical; }
+    .dive-photo-preview { width:100%; max-height:180px; object-fit:contain; }
+    .selected-photo-row { display:flex; align-items:center; gap:12px; margin:10px 0; font-size:12px; }
+    .selected-photo-row span { flex:1; overflow-wrap:anywhere; min-width:0; }
+    .selected-photo-row img { width:60px; height:50px; object-fit:cover; border-radius:4px; }
+    .live-dive .account-actions { margin-top:16px; }
+    .connected-form input[type="checkbox"] { width:auto; }
+    .account-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+    .account-avatar { width:35px; height:35px; border-radius:50%; object-fit:cover; }
+    #connection-status { padding:12px 0; font-size:13px; }
+    .live-dive-photo { width:100%; height:190px; object-fit:cover; border-radius:4px; }
+    .dive-gallery-controls { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0; }
+    .dive-gallery-controls button { border:1px solid #b8cec4; background:#eaf0e7; color:var(--navy); padding:8px 14px; border-radius:4px; }
+    .dive-gallery-controls span { font-size:12px; }
+    #live-dives { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:20px; }
+    .live-dive { padding:22px; background:white; border:1px solid var(--line); overflow-wrap:anywhere; }
+    .live-dive p { line-height:1.7; font-size:14px; white-space:pre-wrap; }
+    .destination-diver-filter { display:flex; align-items:center; gap:12px; margin:18px 0; font-size:13px; }
+    .destination-diver-filter select { min-width:0; max-width:100%; padding:10px 14px; background:white; border:1px solid #b8cec4; border-radius:4px; color:var(--navy); font:inherit; }
   </style>
 </head>
 <body>
-  <div class="app">
-    <header class="topbar">
-      <a class="brand" href="#home" aria-label="OneAD Dive Compass home">
-        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="15" stroke="currentColor" stroke-width="1.5"/><path d="M18 5.5 21.8 16.2 18 14.5 14.2 16.2 18 5.5Z" fill="#f2795b"/><path d="m18 30.5-3.8-10.7 3.8 1.7 3.8-1.7L18 30.5Z" fill="#fff"/><path d="m9.3 18 6.5-1.8m11 1.8-6.5 1.8" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><circle cx="18" cy="18" r="2.1" fill="#d8f36b"/></svg></span>
-        <span class="brand-name">OneAD <span>DIVE COMPASS</span></span>
-      </a>
-      <nav class="nav" aria-label="Main navigation">
-        <button class="active" data-page="home">My Atlantis</button>
-        <button data-page="divelog">Dive log</button>
-        <button data-page="community">Q&amp;A</button>
-        <button data-page="refresher">Refresher</button>
-        <button data-page="shop">Gear exchange</button>
-      </nav>
-      <div class="top-actions">
-        <span class="streak">DIVE STREAK&nbsp; <b>00 weeks</b></span>
-        <button id="auth-button" class="auth-button" type="button" hidden>Sign in</button>
-        <button class="avatar-button" id="profile-button" title="Create or edit your profile" aria-label="Create or edit your profile">A</button>
-        <span class="profile-label" id="profile-name-label">Create profile</span>
+  <div class="preview">CONNECTED DESIGN PREVIEW · Account, profile and logbook use existing Supabase data · Other sections still contain labeled examples</div>
+  <header><div class="nav">
+    <a class="brand" href="#home"><span class="mark" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="17" stroke="currentColor"/><path d="M20 3v5m17 12h-5M20 37v-5M3 20h5" stroke="currentColor"/><path d="m25 11-2 12-8 6 2-12z" fill="#c4dfac"/><path d="m25 11-8 6 6 6z" fill="#ebf1df"/></svg></span><strong>OneAD DIVE COMPASS</strong></a>
+    <nav aria-label="Preview navigation">
+      <button data-page="home" aria-current="page">Overview</button>
+      <button data-page="destinations">Destinations</button>
+      <button data-page="logbook">Logbook</button>
+      <button data-page="knowledge">Knowledge hub</button>
+      <button data-page="community">Community</button>
+    </nav>
+    <div class="member account-actions"><button class="button" id="account-button">Sign in</button><button class="button" id="signout-button" hidden>Sign out</button></div>
+  </div></header>
+  <main>
+    <div id="notice" role="status" hidden></div>
+    <p id="connection-status" role="status" aria-live="polite">Connecting to account service…</p>
+    <section id="logbook" hidden>
+      <div class="explorer-heading"><div class="eyebrow">Your community / Connected logbook</div><h1>Stories from below.</h1></div>
+      <button id="log-dive-button" data-log-dive class="button">＋ Log a dive</button>
+      <p id="logbook-status" role="status"></p><div id="live-dives"></div>
+    </section>
+    <section id="home">
+      <div class="edition"><span>Take only pictures, leave only bubbles</span><span>Vol. 01 — Community edition</span></div>
+      <div class="hero">
+        <img src="Gemini_Generated_Image_wu9dauwu9dauwu9d.jpg" alt="OneAD Dive Compass header artwork">
+        <div class="hero-copy"><div class="eyebrow">Between PCR runs &amp; blue horizons</div><h1>Eat. Sleep.<br>Dive. Repeat.</h1><p>While your PCR assay develops, dream up your next dive adventure. Swap tips on unforgettable sites, then upload the photo that brings your best dive back to life.</p><div class="actions"><button class="button pale" data-story="blue">Read the featured story ↗</button><button class="text-button" data-log-dive>＋ Add your own dive</button></div></div>
       </div>
-    </header>
-    <main>
-      <section class="page active" id="page-home">
-        <div class="hero">
-          <img class="hero-art" src="Gemini_Generated_Image_5ghnyx5ghnyx5ghn.jpg" alt="Scientist wearing scuba gear and fins beside a cobas 6800 in a dive-themed laboratory">
-          <div class="hero-copy">
-            <div class="eyebrow">Between PCR runs &amp; blue horizons</div>
-            <h1>Eat. Sleep.<br>Dive. Repeat.</h1>
-            <p>While your PCR assay develops, dream up your next dive adventure. Swap tips on unforgettable sites, then upload the photo that brings your best dive back to life.</p>
-            <div class="hero-cta">
-              <button class="button light" data-action="new-dive"><span class="icon">＋</span> Share your best dive</button>
-              <a class="text-link" href="#divelog" data-go="divelog">Browse community dive logs&nbsp; ↗</a>
-            </div>
-          </div>
+      <div class="stats" aria-label="Illustrative community statistics"><div class="stat"><strong>38</strong><span>Community<br>dives logged</span></div><div class="stat"><strong>12</strong><span>Countries<br>explored together</span></div><div class="stat"><strong>94</strong><span>Photos<br>worth resurfacing for</span></div></div>
+      <div class="heading"><div><div class="eyebrow">Selected pages from our journal</div><h2>Worth coming up to share.</h2></div><button class="text-button" data-demo="The full logbook would open here.">Open the logbook →</button></div>
+      <div class="story-grid">
+        <article class="card"><img src="https://images.unsplash.com/photo-1546026423-cc4642628d2b?auto=format&amp;fit=crop&amp;w=1000&amp;q=85" alt="Colorful underwater reef" loading="lazy"><div class="card-body"><div class="eyebrow">01 / Indonesia · Raja Ampat</div><h3><button class="story-link" data-story="reef">A thousand tiny worlds.</button></h3><p>“I went looking for the big encounters.<br>I came home remembering the smallest ones.”</p><div class="meta"><span>Arielle · Sample story</span><span>6 photographs</span></div></div></article>
+        <article class="card"><img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;w=700&amp;q=80" alt="Underwater dive scene" loading="lazy"><div class="card-body"><div class="eyebrow">02 / Maldives</div><h3><button class="story-link" data-story="blue">The blue hour.</button></h3><p>“For a moment, there was nothing to do but look.”</p><div class="meta"><span>Alex · Sample story</span><span>4 photos</span></div></div></article>
+        <article class="card"><img src="https://images.unsplash.com/photo-1551244072-5d12893278ab?auto=format&amp;fit=crop&amp;w=700&amp;q=80" alt="Ocean wildlife and underwater textures" loading="lazy"><div class="card-body"><div class="eyebrow">03 / Egypt · Red Sea</div><h3><button class="story-link" data-story="home">A place to return to.</button></h3><p>“Same reef. A completely different story.”</p><div class="meta"><span>Sam · Sample story</span><span>3 photos</span></div></div></article>
+      </div>
+      <div class="journal-row"><div><div class="eyebrow">Around the community</div><h2>The surface interval.</h2><div class="activity"><span class="avatar">A</span><p><strong>Arielle</strong> added a field note from Indonesia.<br><small>Sample activity · Dive journal</small></p></div><div class="activity"><span class="avatar">J</span><p><strong>Jamie asks:</strong> What made your first night dive memorable?<br><small>Sample conversation · Community</small></p></div><div class="activity"><span class="avatar">S</span><p><strong>Sam</strong> is passing on a well-loved camera tray.<br><small>Sample listing · Gear exchange</small></p></div></div>
+        <div class="dispatch"><span class="ring" aria-hidden="true"></span><div class="eyebrow">A note to your future dive buddy</div><h2>Every great dive starts with a conversation.</h2><p>Take a moment to revisit the essentials. Bring your questions, curiosity, and experience to your next professional skills review.</p><button class="button" data-page="knowledge">Explore the knowledge hub →</button></div>
+      </div>
+      <div class="split">
+        <div class="destination"><div class="eyebrow">Our blue planet</div><h2>Different oceans.<br>Shared adventures.</h2><p>Explore sample field notes from Indonesia, Maldives, and Egypt.</p><button class="text-button" data-demo="Map concept only. A live map would need verified location data.">Explore destinations →</button><img class="map" src="world-map.svg" alt="" aria-hidden="true"></div>
+        <div class="garden"><div class="eyebrow">Our shared dive milestone</div><h2>Our community coral garden.</h2><p>One colorful nudibranch for every dive.<br>A little more life with every story we share.</p>
+          <svg class="reef-scene" viewBox="0 0 620 310" role="img" aria-labelledby="reef-title reef-desc">
+            <title id="reef-title">An illustrated nudibranch reef garden</title>
+            <desc id="reef-desc">Thirty-eight small sea slugs with rippled mantles, paired rhinophores, spots, and feathery gills among branching corals and rocks. An artistic sample milestone, not a species-identification diagram.</desc>
+            <defs>
+              <linearGradient id="reef-water" x2="0" y2="1"><stop stop-color="#0d3b50"/><stop offset="1" stop-color="#1c6069"/></linearGradient>
+              <linearGradient id="reef-floor" x2="0" y2="1"><stop stop-color="#486d66"/><stop offset=".6" stop-color="#829184"/><stop offset="1" stop-color="#b2aa8b"/></linearGradient>
+              <radialGradient id="reef-rock"><stop stop-color="#819481"/><stop offset=".6" stop-color="#4d6c63"/><stop offset="1" stop-color="#263f43"/></radialGradient>
+              <pattern id="sand-grain" width="31" height="23" patternUnits="userSpaceOnUse"><circle cx="4" cy="5" r=".7" fill="#f0dec0" opacity=".4"/><circle cx="21" cy="17" r="1" fill="#183e43" opacity=".3"/><path d="m8 18 5-1m10-11 3 1" stroke="#cfccb0" stroke-width=".6" opacity=".5"/></pattern>
+              <pattern id="coral-polyps" width="11" height="9" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="2.3" fill="none" stroke="#ecc5a7" stroke-width=".8"/><circle cx="4" cy="4" r=".8" fill="#664e56"/></pattern>
+              <g id="striped-slug">
+                <path d="M-29 5Q-24-3-22-10Q-17-16-10-12Q-1-17 9-11Q20-12 25-5L33 5Q24 10 18 12Q8 17-1 12Q-13 17-20 10Z" fill="#eef4da" stroke="#e3a32b" stroke-width="2.5"/>
+                <path d="M-21-5Q0-10 20 1M-24 2Q-1-3 24 6M-17 8Q1 3 17 10" fill="none" stroke="#223550" stroke-width="2.6"/>
+                <path d="m-18-7-3-11m10 10 1-13" stroke="#e5a038" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="m12 1-4-10m4 10 2-12m-2 12 8-8m-8 8 10-1" fill="none" stroke="#d99029" stroke-width="2"/>
+              </g>
+              <g id="aeolid-slug">
+                <path d="M-27 3Q-11-6 13-2L34 5 13 9Q-10 13-27 3Z" fill="#b6d6e6" stroke="#e0f5ed" stroke-width="1"/>
+                <g fill="currentColor" stroke="#f2d6cf" stroke-width=".8">
+                  <path d="M-17 3Q-32-19-21-20Q-14-15-13 2ZM-9 1Q-22-25-12-25Q-6-18-5 1ZM0 1Q-9-27 1-25Q7-17 5 2ZM9 2Q8-20 16-18Q21-12 14 4ZM17 5Q21-11 26-6Q28 0 21 6Z"/>
+                  <path d="M-17 5Q-29 23-20 23Q-12 19-13 6ZM-8 6Q-18 29-9 27Q-2 21-4 6ZM1 7Q-3 29 5 25Q12 19 7 7ZM11 7Q14 26 20 20Q23 15 16 7Z"/>
+                </g>
+                <path d="m-23 1-12-8m13 10-13 8m13-10-1-15m5 14 4-16" fill="none" stroke="#f3d8c6" stroke-width="2" stroke-linecap="round"/>
+              </g>
+              <g id="spotted-slug">
+                <path d="M-26 3Q-26-11-12-14Q0-21 13-12Q27-10 28 2Q25 17 11 14Q-2 21-15 13Q-25 14-26 3Z" fill="#f0d87e" stroke="#f8f0ba" stroke-width="2"/>
+                <g fill="#202c44"><circle cx="-17" cy="0" r="3"/><circle cx="-9" cy="-8" r="2.8"/><circle cx="-7" cy="7" r="3"/><circle cx="1" cy="-3" r="2.6"/><circle cx="5" cy="10" r="2"/><circle cx="17" cy="-5" r="2.7"/><circle cx="21" cy="6" r="2.4"/></g>
+                <path d="m-18-8-2-12m10 10 1-12" stroke="#39324a" stroke-width="3" stroke-linecap="round"/>
+                <path d="M12 5 6-8m6 13 2-16m-2 16 9-11m-9 11 13-3m-13 3 8 7" stroke="#f7edc1" stroke-width="2" fill="none"/>
+              </g>
+              <radialGradient id="reef-light"><stop stop-color="#a7dcd1" stop-opacity=".16"/><stop offset="1" stop-color="#a7dcd1" stop-opacity="0"/></radialGradient>
+              <g id="sea-slug">
+                <path d="M-23 3Q-21-3-16-5Q-18-10-12-12Q-9-17-3-14Q3-19 9-14Q18-15 20-9Q28-7 25-1Q30 5 23 8Q23 14 16 13Q10 18 4 14Q-3 18-9 14Q-17 17-19 10Q-27 9-23 3Z" fill="currentColor" stroke="#f7e9d4" stroke-width="1.5"/>
+                <path d="M-18 3Q-9-12 7-10Q22-8 20 3Q11 13-4 10Q-16 10-18 3Z" fill="#ffffff25"/>
+                <path d="M-13-5l-3-10m10 7 1-12" stroke="#f9ecd8" stroke-width="2.8" stroke-linecap="round"/>
+                <path d="m-17-16 3 1m-2-4 2 1m7-3 4 1m-4 3 4 1" stroke="#eeb254" stroke-width="2" stroke-linecap="round"/>
+                <g stroke="#fff5df" stroke-width="1.3" fill="none" stroke-linecap="round">
+                  <path d="M10 4V-8M10 0 4-5M10 0l7-6M10-3 6-9M10-3l4-7M10 3 3 0m7 3 8-3"/>
+                  <path d="m5-4-3 1m3-1v-3m10 2 4 1m-4-1 1-3"/>
+                </g>
+                <g fill="#243a62"><ellipse cx="-9" cy="1" rx="2.2" ry="1.5"/><circle cx="-2" cy="-5" r="1.5"/><circle cx="0" cy="5" r="1.7"/><circle cx="17" cy="6" r="1.3"/><circle cx="-12" cy="7" r="1.2"/></g>
+              </g>
+            </defs>
+            <rect width="620" height="310" fill="url(#reef-water)"/>
+            <ellipse cx="270" cy="45" rx="330" ry="190" fill="url(#reef-light)"/>
+            <path d="m125 0 60 0 160 205-90-30ZM292 0h26l93 165-47-15Z" fill="#c8eee1" opacity=".035"/>
+            <g fill="#bce7dc" opacity=".25"><circle cx="75" cy="65" r="2"/><circle cx="180" cy="35" r="1.5"/><circle cx="499" cy="69" r="2"/><circle cx="539" cy="35" r="1"/><circle cx="357" cy="53" r="1.5"/></g>
+            <path d="M0 214Q70 174 143 207T294 198T444 207T620 190V310H0Z" fill="#28555d"/>
+            <path d="M0 252Q90 212 177 243T354 230T510 235T620 219V310H0Z" fill="url(#reef-floor)"/>
+            <path d="M0 252Q90 212 177 243T354 230T510 235T620 219V310H0Z" fill="url(#sand-grain)"/>
+            <g fill="url(#reef-rock)" stroke="#7c9683" stroke-width=".7"><path d="M85 230q-16-48 18-70 34-17 69 12l20 65Z"/><path d="M241 262q-25-55 15-86 51-27 77 12l20 66Z"/><path d="M397 239q-5-49 31-67 31-9 59 21l-1 43Z"/></g>
+            <g fill="none" stroke="#bdc3a3" opacity=".25"><path d="m106 181 20-7 26 16m-52 16 32-9 33 14m96-11 27-12 25 21m-48 19 31-7 24 14m104-45 28 8-9 20"/></g>
+            <g id="reef-fans"></g>
+            <g fill="#9f8b7e" stroke="#c9ad8a" stroke-width="1.2"><path d="M0 297q-8-40 23-55 37-17 62 5 28 28 13 50Z"/><path d="M442 310q-7-35 13-48 27-21 55-3 25 18 23 51Z"/></g>
+            <g fill="url(#coral-polyps)" opacity=".8"><path d="M0 297q-8-40 23-55 37-17 62 5 28 28 13 50Z"/><path d="M442 310q-7-35 13-48 27-21 55-3 25 18 23 51Z"/></g>
+            <g fill="#42686a" stroke="#6c8d83" stroke-width="1"><path d="M78 274q5-40 48-42t62 34z"/><path d="M345 282q-7-47 40-57t76 49z"/><path d="M461 231q5-25 38-27t39 30z"/></g>
+            <g fill="none" stroke-linecap="round">
+              <g stroke="#cb8f83" stroke-width="7"><path d="M42 275v-82m0 36-21-24m21 43 25-25m-25-14 14-26M21 205v-20m46 38 9-19"/></g>
+              <g stroke="#e1b48a" stroke-width="5"><path d="M82 282v-55m0 25-12-14m12 26 16-15m0 0 2-16"/></g>
+              <g stroke="#b0a2bb" stroke-width="6"><path d="M574 273v-93m0 37-24-21m24 41 24-24m-24-13 12-23m-36 19-5-17m53 34 7-18"/></g>
+              <g stroke="#91b6a0" stroke-width="4"><path d="M532 283q-15-27-9-52m9 52q3-45 17-60m-17 60q-5-32 7-49"/></g>
+            </g>
+            <g id="reef-nudibranchs"></g>
+            <g fill="#cccfb0" opacity=".5"><circle cx="110" cy="296" r="2"/><circle cx="237" cy="281" r="2"/><circle cx="324" cy="297" r="1.5"/><circle cx="472" cy="291" r="2"/><circle cx="195" cy="261" r="1.5"/></g>
+          </svg>
+          <div class="track"><span></span></div><small>38 / 100 dives · Illustrative progress</small>
         </div>
-        <div class="stats" aria-label="Your dive stats">
-          <div class="stat"><strong id="stat-dives">12</strong><span>dives logged</span></div>
-          <div class="stat"><strong id="stat-countries">08</strong><span>countries explored</span></div>
-          <div class="stat"><strong id="stat-highlights">21</strong><span>memories collected</span></div>
-        </div>
-        <div class="overview-grid">
-          <div>
-            <div class="challenge">
-              <div><div class="challenge-label">OneAD community challenge</div><h3>100 dives. One coral garden.</h3><p>Every community dive adds a nudibranch to our growing reef.</p></div>
-              <div class="challenge-count"><span id="challenge-count">0</span><small> / 100</small></div>
-              <div class="whale-tracker"><svg viewBox="0 0 480 270" role="img" aria-labelledby="whale-title whale-description"><title id="whale-title">Community whale shark dive tracker</title><desc id="whale-description">Top-down whale shark silhouette with a broad blunt head, pectoral fins, gill slits, and a tapered tail. Each spot represents one community dive.</desc><defs><linearGradient id="shark-skin" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#4291aa"/><stop offset=".55" stop-color="#216b86"/><stop offset="1" stop-color="#104762"/></linearGradient><clipPath id="shark-body-clip"><path d="M207 28C215 18 227 14 240 14S265 18 273 28C281 38 279 54 273 67 266 79 260 95 257 117 253 148 247 178 244 207L240 246 236 207C233 178 227 148 223 117 220 95 214 79 207 67 201 54 199 38 207 28Z"/><path d="M216 70C196 73 170 86 134 104 119 111 106 121 108 130 110 138 123 136 138 129L227 99Z"/><path d="M264 70C284 73 310 86 346 104 361 111 374 121 372 130 370 138 357 136 342 129L253 99Z"/><path d="M229 158 204 176 235 171ZM251 158 276 176 245 171Z"/></clipPath></defs><path d="M216 70C196 73 170 86 134 104 119 111 106 121 108 130 110 138 123 136 138 129L227 99Z" fill="#194f69" stroke="#9bd0df" stroke-width="2.5"/><path d="M264 70C284 73 310 86 346 104 361 111 374 121 372 130 370 138 357 136 342 129L253 99Z" fill="#194f69" stroke="#9bd0df" stroke-width="2.5"/><path d="M207 28C215 18 227 14 240 14S265 18 273 28C281 38 279 54 273 67 266 79 260 95 257 117 253 148 247 178 244 207L240 246 236 207C233 178 227 148 223 117 220 95 214 79 207 67 201 54 199 38 207 28Z" fill="url(#shark-skin)" stroke="#a9d8e2" stroke-width="2.5"/><path d="M236 127 240 111 244 127 243 151 237 151Z" fill="#15516d" stroke="#9bd0df" stroke-width="1.5"/><path d="M229 158 204 176 235 171ZM251 158 276 176 245 171Z" fill="#1d5e78" stroke="#9bd0df" stroke-width="1.5"/><path d="M236 235C226 243 211 251 208 265 222 263 234 256 240 249 246 256 258 263 272 265 269 251 254 243 244 235L240 252Z" fill="#123f58" stroke="#9bd0df" stroke-width="2"/><g id="whale-spots" clip-path="url(#shark-body-clip)"></g><g fill="none" stroke="#b8e2e9" stroke-width="1.5" opacity=".8"><path d="M211 61q-7 11-9 23"/><path d="M216 63q-6 11-7 23"/><path d="M221 65q-5 10-5 22"/><path d="M269 61q7 11 9 23"/><path d="M264 63q6 11 7 23"/><path d="M259 65q5 10 5 22"/></g><circle cx="209" cy="42" r="2.3" fill="#082c42"/><circle cx="271" cy="42" r="2.3" fill="#082c42"/></svg></div>
-              <div class="nudibranch-progress-label" id="whale-progress-label">0 of 100 dives logged</div>
-              <div class="progress-track"><span id="challenge-progress" style="width:0%"></span></div>
-            </div>
-            <div class="section-row"><div><div class="eyebrow">The logbook</div><h2>Recent dives</h2></div><button class="quiet-link" data-action="new-dive">＋ Add a dive</button></div>
-            <div id="recent-list" class="recent-list"></div>
-          </div>
-        </div>
-        <div class="community-strip">
-          <a class="community-teaser" href="#community" data-go="community"><small>From the community</small><p>“What's the one dive you still dream about?”</p></a>
-          <a class="community-teaser" href="#refresher" data-go="refresher"><small>Quick refresher</small><p>Pre-dive checks, nitrox &amp; specialty dive ideas.</p></a>
-          <a class="community-teaser" href="#shop" data-go="shop"><small>Good gear, good miles</small><p>Pass your well-loved kit on to another diver.</p></a>
-        </div>
-        <div class="footer"><span>ONEAD DIVE COMPASS · MADE FOR THE MOMENTS BETWEEN DESCENTS</span><span>Community logs and photos are shared with signed-in members. Anyone can join by email.</span></div>
+      </div>
+      <div class="heading"><div><div class="eyebrow">A little review goes a long way</div><h2>Before your next adventure.</h2></div><button class="text-button" data-page="knowledge">Visit the knowledge hub →</button></div>
+      <div class="cards">
+        <button class="learning" data-page="knowledge"><span class="number">01 /</span><h3>Start with a better buddy check.</h3><p>Shared expectations. Familiar equipment. A plan you both understand.</p><small>PLANNING &amp; PREPARATION →</small></button>
+        <button class="learning" data-page="knowledge"><span class="number">02 /</span><h3>Find your balance.</h3><p>Revisit buoyancy concepts and identify skills to practise with an instructor.</p><small>BUOYANCY &amp; TRIM →</small></button>
+        <button class="learning" data-page="knowledge"><span class="number">03 /</span><h3>Been a while?</h3><p>Make your return a confident one with a professional skills review.</p><small>RETURNING TO DIVING →</small></button>
+      </div>
+    </section>
+    <section id="destinations" hidden>
+      <div class="explorer-heading"><div class="eyebrow">The AD community atlas</div><h1>A world beneath the surface.</h1><p>Different oceans. Shared discoveries.</p></div>
+      <div class="world-panel">
+        <svg viewBox="0 0 960 480" role="group" aria-labelledby="atlas-title atlas-description">
+          <title id="atlas-title">Community destination explorer</title>
+          <desc id="atlas-description">Natural Earth world geography with selectable country markers for Egypt, Maldives, and Indonesia. Markers represent approximate country locations, not dive sites. The buttons below offer the same filters.</desc>
+          <path class="grid" d="M0 80h960M0 160h960M0 240h960M0 320h960M0 400h960M160 0v480M320 0v480M480 0v480M640 0v480M800 0v480"/>
+          <image href="world-map.svg" width="960" height="480" pointer-events="none"/>
+          <defs><g id="dive-flag"><path d="M0 0v-33" stroke="#163e4b" stroke-width="3"/><path class="dive-flag" d="M0-33h27v19H0z"/><path d="m1-32 25 17" stroke="white" stroke-width="5"/></g></defs>
+          <g role="button" tabindex="0" data-country-marker="Egypt" aria-label="Explore Egypt sample dives" aria-pressed="false"><use href="#dive-flag" x="560" y="171"/><text x="592" y="149">Egypt</text></g>
+          <g role="button" tabindex="0" data-country-marker="Maldives" aria-label="Explore Maldives sample dives" aria-pressed="false"><use href="#dive-flag" x="675" y="229"/><text x="598" y="253">Maldives</text></g>
+          <g role="button" tabindex="0" data-country-marker="Indonesia" aria-label="Explore Indonesia sample dives" aria-pressed="false"><use href="#dive-flag" x="795" y="246"/><text x="827" y="224">Indonesia</text></g>
+        </svg>
+        <p class="map-caption">Made with <a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noopener noreferrer">Natural Earth</a> public-domain country boundaries (1:110 million), in an equirectangular projection. Small islands may be omitted at this scale. Markers indicate approximate country locations, not verified dive sites. Sample entries only.</p>
+      </div>
+      <div class="tabs" aria-label="Filter sample dives by country">
+        <button data-country="All" aria-pressed="true">All destinations</button>
+        <button data-country="Indonesia" aria-pressed="false">Indonesia</button>
+        <button data-country="Maldives" aria-pressed="false">Maldives</button>
+        <button data-country="Egypt" aria-pressed="false">Egypt</button>
+      </div>
+      <div class="heading"><div><div class="eyebrow">Pages from this destination</div><h2 id="destination-title">Across our blue planet.</h2></div></div>
+      <p id="destination-count" class="result-count" role="status">3 sample entries · 3 countries</p>
+      <div class="cards">
+        <article class="destination-card" data-dive-country="Indonesia"><div class="eyebrow">Indonesia / Raja Ampat</div><h3>A thousand tiny worlds.</h3><p>Arielle's fictional field note about the little encounters that make a dive memorable.</p><div class="meta"><span>Arielle · Sample entry</span><span>6 illustrative photos</span></div><div class="actions"><button class="button" data-story="reef">Read sample story ↗</button></div></article>
+        <article class="destination-card" data-dive-country="Maldives"><div class="eyebrow">Maldives / North Malé Atoll</div><h3>The blue hour.</h3><p>A fictional story about light, stillness, and the things we notice when we slow down.</p><div class="meta"><span>Alex · Sample entry</span><span>4 illustrative photos</span></div><div class="actions"><button class="button" data-story="blue">Read sample story ↗</button></div></article>
+        <article class="destination-card" data-dive-country="Egypt"><div class="eyebrow">Egypt / Red Sea</div><h3>A place to return to.</h3><p>A fictional return to a familiar reef, seen through a different pair of eyes.</p><div class="meta"><span>Sam · Sample entry</span><span>3 illustrative photos</span></div><div class="actions"><button class="button" data-story="home">Read sample story ↗</button></div></article>
+      </div>
+      <p class="editor-note">This prototype filters local sample cards only. A connected version would derive destinations from authorized Supabase dive records. It would never expose private community data to signed-out visitors.</p>
+      <section class="wheel-panel" aria-labelledby="wheel-heading">
+        <div class="wheel-stage"><svg id="dive-wheel" viewBox="0 0 400 400" role="img" aria-label="Dive destination wheel. Spin to select one of the displayed destinations."></svg></div>
+        <div><div class="eyebrow">Your next blue horizon</div><h2 id="wheel-heading">Let the ocean choose.</h2><p>A reef you've never heard of. An island you've always dreamed of. Spin the dive wheel and find a little inspiration for your next adventure.</p><p id="wheel-pool" class="editor-note"></p><button id="wheel-spin" class="button pale">Spin the dive wheel ↻</button><div id="wheel-result" role="status" aria-live="polite"><strong>Where will you surface next?</strong><p>Give the wheel a spin to discover a dive site and its destination.</p></div><details><summary>Browse every destination in the wheel</summary><p id="wheel-destinations"></p></details><p class="editor-note">Travel inspiration, not a suitability recommendation. Check current access, local rules, conditions, conservation restrictions, and required qualifications with a reputable local operator. The wheel is independent of community map entries.</p></div>
       </section>
-
-      <section class="page" id="page-divelog">
-        <div class="page-heading"><div><div class="eyebrow">Shared entries</div><h1>Community dive log.</h1><p>Log a dive with a site and country, plus photos and a highlight.</p></div><button class="button" data-action="new-dive"><span class="icon">＋</span> Log a dive</button></div>
-        <div class="dive-log-filters">
-          <label for="dive-person-filter">Person<select id="dive-person-filter"><option value="">Everyone</option></select></label>
-          <label for="dive-country-filter">Country<select id="dive-country-filter"><option value="">Everywhere</option></select></label>
-          <label for="dive-site-filter">Dive site<input id="dive-site-filter" type="search" placeholder="Search a dive site"></label>
+    </section>
+    <section id="knowledge" hidden>
+      <div class="knowledge-hero"><div><div class="eyebrow">The dive knowledge hub</div><h1>Less guesswork.<br>More wonder.</h1><p>Revisit the essentials, ask better questions, and find your next learning step. A thoughtful companion to your training—not a replacement for it.</p><button class="button" data-filter-link="library">Explore the Dive library ↓</button></div><div class="note"><h3>Knowledge is the starting point.</h3><p>This independent concept is not a PADI or SSI course, certification, or endorsement. Practical skills require appropriate training and supervised practice. Content needs instructor review before publication.</p></div></div>
+      <div class="tabs" aria-label="Knowledge categories"><button data-filter="library" aria-pressed="true">Dive library</button><button data-filter="core" aria-pressed="false">Core summaries</button><button data-filter="specialty" aria-pressed="false">Specialty awareness</button><button data-filter="return" aria-pressed="false">Returning after a break</button></div>
+      <div class="hub-intro"><span>FIELD GUIDE / Independent knowledge review</span><span>Read thoughtfully. Practise with a professional.</span></div>
+      <div class="hub"><div>
+        <div data-group="library"><div id="topic-library" class="topic-library" aria-label="Dive library"></div><article id="topic-article" class="topic-article" aria-label="Selected knowledge topic" hidden></article></div>
+        <div class="modules" data-group="core" hidden>
+          <article class="module"><div class="topic"><span>01 / PREPARATION</span><span>Concept review</span></div><h3>Ready is a conversation.</h3><p>Consider your recent experience, comfort, health concerns, and familiarity with the equipment and conditions.</p><details><summary>Explore this topic</summary><p><strong>Ask yourself:</strong> What has changed since my last dive? What would I like to practise with a professional?</p><p><strong>Discuss before booking:</strong> Tell the operator about time away, unfamiliar equipment, and any concerns. Seek qualified medical advice when appropriate.</p></details></article>
+          <article class="module"><div class="topic"><span>02 / BUDDY PLANNING</span><span>Before every dive</span></div><h3>Two divers. One plan.</h3><p>Review the route, conditions, communication, entry and exit, and what to do if the plan changes.</p><details><summary>Explore this topic</summary><p><strong>Buddy discussion:</strong> Can you both explain the agreed plan and separation procedure?</p><p><strong>Instructor prompt:</strong> Review the buddy-check sequence taught in your training on the actual equipment you will use. Resolve concerns before entry.</p></details></article>
+          <article class="module"><div class="topic"><span>03 / BUOYANCY</span><span>Skills to practise</span></div><h3>Less effort. More ocean.</h3><p>Revisit how weighting, equipment configuration, and controlled movement relate to comfort and reef protection.</p><details><summary>Explore this topic</summary><p><strong>Ask your instructor:</strong> Should we review my weighting after changing exposure protection or cylinders?</p><p>Practise unfamiliar skills with appropriate professional supervision. Keep fins, hands, and camera equipment clear of marine life.</p></details></article>
+          <article class="module"><div class="topic"><span>04 / GAS AWARENESS</span><span>Plan together</span></div><h3>Awareness is a habit.</h3><p>Understand your equipment and agree on a gas plan appropriate to the dive with your buddy and qualified professional.</p><details><summary>Explore this topic</summary><p><strong>Discussion prompt:</strong> How will you monitor and communicate gas status, and what ends the dive?</p><p>A single pressure rule is not appropriate to every dive. Review planning and contingencies within your training.</p></details></article>
+          <article class="module"><div class="topic"><span>05 / DIVE COMPUTERS</span><span>Know your equipment</span></div><h3>Your dive. Your information.</h3><p>Be familiar with your own computer's settings, displays, alerts, and manufacturer instructions.</p><details><summary>Explore this topic</summary><p><strong>Before travelling:</strong> Review the manual and ask a professional about displays or settings you do not understand.</p><p>Another diver's computer is not a substitute for monitoring your own dive within your training and limits.</p></details></article>
+          <article class="module"><div class="topic"><span>06 / OCEAN CARE</span><span>Every encounter</span></div><h3>Be a guest, not a disturbance.</h3><p>Observe without handling wildlife. Keep your equipment controlled and follow local conservation requirements.</p><details><summary>Explore this topic</summary><p><strong>Photo question:</strong> Can I take this image without touching the bottom, moving an animal, or blocking its path?</p><p>Ask your local guide about site-specific restrictions and responsible observation.</p></details></article>
         </div>
-        <div id="dive-log-list" class="dive-log-list"></div>
-      </section>
-
-      <section class="page" id="page-community">
-        <div class="page-heading"><div><div class="eyebrow">Better together, below the surface</div><h1>Ask the dive community.</h1><p>Real-world advice from people who have been there.</p></div><button class="button" data-action="ask-question"><span class="icon">＋</span> Ask a question</button></div>
-        <div class="community-layout"><div><div class="filter-row"><button class="filter-chip active" data-filter="All">All conversations</button><button class="filter-chip" data-filter="Travel">Dive travel</button><button class="filter-chip" data-filter="Skills">Skills &amp; safety</button><button class="filter-chip" data-filter="Gear">Gear advice</button></div><div class="question-list" id="question-list"></div></div>
-          <aside class="side-panel"><div class="eyebrow">Good to know</div><h3>Curious is a good place to start.</h3><p>Ask about a site, a skill, or the little things you only learn after your first hundred dives. Keep it kind and keep safety first.</p><button class="button" data-action="ask-question">Start a conversation</button></aside>
+        <div class="modules" data-group="specialty" hidden>
+          <article class="module"><div class="topic"><span>FURTHER TRAINING</span></div><h3>Nitrox &amp; gas knowledge.</h3><p>Explore formal enriched-air training. This preview does not teach gas analysis, computer setup, or exposure calculations.</p><details><summary>Questions for your instructor</summary><p>What certification, analysis procedures, and equipment familiarity will this trip require?</p></details></article>
+          <article class="module"><div class="topic"><span>FURTHER TRAINING</span></div><h3>Night, current &amp; cold water.</h3><p>Different environments bring different preparation needs. Match the dive to your qualifications and recent experience.</p><details><summary>Questions for your instructor</summary><p>What supervised preparation, exposure protection, communication, and local procedures do I need?</p></details></article>
+          <article class="module"><div class="topic"><span>SEPARATE QUALIFICATIONS</span></div><h3>Overhead environments.</h3><p>Wreck penetration and cave diving are not extensions of an ordinary open-water dive. They require specific training and preparation.</p><details><summary>Know the boundary</summary><p>Do not enter an overhead environment without the appropriate qualifications, equipment, planning, and team procedures.</p></details></article>
         </div>
+        <div class="modules" data-group="return" hidden>
+          <article class="module"><div class="topic"><span>WELCOME BACK</span></div><h3>Make room for a refresher.</h3><p>Discuss your time away, comfort, equipment changes, and planned conditions with a qualified dive professional.</p><details><summary>Prepare for the conversation</summary><p>Bring your certification and recent experience details. Ask about a knowledge review and supervised in-water practice appropriate to you.</p></details></article>
+          <article class="module"><div class="topic"><span>YOUR NEXT STEP</span></div><h3>Review. Practise. Reconnect.</h3><p>Look into PADI ReActivate or ask an SSI training center about Scuba Skills Update. Your instructor can help identify an appropriate route.</p><details><summary>Keep expectations clear</summary><p>Reading this hub or completing a quiz is not a skills assessment, refresher certification, or clearance to dive.</p></details></article>
+        </div>
+      </div><aside><div class="garden"><div class="eyebrow">A confident return</div><h2>Your next step might be a refresher.</h2><p>Trade uncertainty for a conversation with a qualified dive professional.</p><button class="button pale" data-filter-link="return">Explore your return →</button></div><div class="sources"><h3>Learn from the source.</h3><p>Independent summaries in original wording. No agency affiliation or endorsement is implied.</p><a href="https://www.padi.com/courses/reactivate" target="_blank" rel="noopener noreferrer">PADI ReActivate ↗</a><a href="https://www.divessi.com/" target="_blank" rel="noopener noreferrer">SSI — find a training center ↗</a><p>Illustrative content structure. Detailed source mapping and instructor review are required for the final learning hub.</p></div></aside></div>
+      <section class="reef-quiz" aria-labelledby="quiz-title">
+        <div class="eyebrow">Read. Reflect. Put your knowledge to the test.</div>
+        <h2 id="quiz-title">Reef-side manners.</h2>
+        <p class="editor-note">Choose a topic: 20 reef-side manners questions, plus six other checks with five questions each. Original awareness questions, not a skills assessment or a PADI/SSI exam. Not instructor-reviewed; results are not saved. Switching topics starts a new attempt.</p>
+        <label for="quiz-topic">Knowledge check</label>
+        <select id="quiz-topic" class="quiz-option"></select>
+        <p id="quiz-progress" class="editor-note"></p>
+        <h3 id="quiz-question" tabindex="-1"></h3>
+        <div id="quiz-options" class="quiz-options" role="group" aria-labelledby="quiz-question"></div>
+        <p id="quiz-feedback" class="quiz-feedback" role="status" aria-live="polite"></p>
+        <button id="quiz-next" class="button" hidden>Next question →</button>
+        <button id="quiz-restart" class="button" hidden>Try again</button>
       </section>
-
-      <section class="page" id="page-refresher">
-        <div class="page-heading"><div><div class="eyebrow">Skills, specialties &amp; places to start</div><h1>Quick dive refresher.</h1><p>Use this as a planning checklist, not dive training. Choose sites and conditions within your certification, experience, health, and local operator briefing.</p></div></div>
-        <div class="refresher-grid"><div class="lesson-list">
-          <article class="lesson open"><button class="lesson-toggle"><span class="lesson-number">01</span><span class="lesson-title">Basic pre-dive &amp; buddy check<small>Safety · Every dive</small></span><span class="lesson-arrow">−</span></button><div class="lesson-body"><p>Agree on the dive plan, limits, signals, entry and exit, gas plan, and lost-buddy procedure. Use the equipment and buddy-check sequence you were trained in; resolve any issue before entering the water.</p><p><strong>Places to research:</strong> Bonaire has many shore-entry sites and local operators for guided refresher dives. Conditions and access vary by site.</p></div></article>
-          <article class="lesson"><button class="lesson-toggle"><span class="lesson-number">02</span><span class="lesson-title">Buoyancy, trim &amp; weighting<small>Core skills</small></span><span class="lesson-arrow">＋</span></button><div class="lesson-body"><p>Build relaxed, controlled movement and protect the bottom and marine life. Ask an instructor for a buoyancy check when changing exposure suit, tank, or equipment; make small adjustments and follow your training for ascents and stops.</p><p><strong>Places to research:</strong> Bonaire and the calm reef sites around Roatán offer operator-led skills refreshers; check current conditions and entry requirements.</p></div></article>
-          <article class="lesson"><button class="lesson-toggle"><span class="lesson-number">03</span><span class="lesson-title">Enriched air nitrox<small>Specialty · Gas planning</small></span><span class="lesson-arrow">＋</span></button><div class="lesson-body"><p>Use nitrox only with the required training. Analyze and verify the cylinder according to your course and operator procedure, set your computer to the analyzed mix, and stay within the depth and exposure limits you were taught.</p><p><strong>Places to research:</strong> Bonaire and Cozumel have many dive operators; confirm nitrox availability, training, and cylinder procedures before booking.</p></div></article>
-          <article class="lesson"><button class="lesson-toggle"><span class="lesson-number">04</span><span class="lesson-title">Negative entries &amp; boat entries<small>Entry techniques</small></span><span class="lesson-arrow">＋</span></button><div class="lesson-body"><p>A negative entry is not a shortcut or default. Use an entry method only when your training, operator briefing, sea state, equipment, and buddy plan support it. If you are not comfortable or conditions change, tell the crew and choose another plan.</p><p><strong>Places to research:</strong> Cozumel boat operators sometimes plan current-assisted entries. Ask about the entry, exit, and alternatives; do not attempt a negative entry without prior instruction and practice.</p></div></article>
-          <article class="lesson"><button class="lesson-toggle"><span class="lesson-number">05</span><span class="lesson-title">Current, drift &amp; live-boat dives<small>Conditions · Planning</small></span><span class="lesson-arrow">＋</span></button><div class="lesson-body"><p>Current strength and direction can change quickly. Review the briefing, stay with your buddy and guide, use the agreed pickup procedure, and skip the dive if the conditions exceed your experience.</p><p><strong>Places to research:</strong> Palau's Blue Corner and Cozumel are known for current-influenced diving. They can be demanding; book with a local operator and follow site-specific limits.</p></div></article>
-          <article class="lesson"><button class="lesson-toggle"><span class="lesson-number">06</span><span class="lesson-title">Reef-hook dives<small>Current specialty · Reef care</small></span><span class="lesson-arrow">＋</span></button><div class="lesson-body"><p>Use a reef hook only where the operator explicitly permits it and after learning the correct method. Never attach to living coral or use one to compensate for poor buoyancy. Follow local conservation rules.</p><p><strong>Places to research:</strong> Some Palau operators offer guided current dives at Blue Corner and explain if a hook is appropriate for that day's conditions.</p></div></article>
-          <article class="lesson"><button class="lesson-toggle"><span class="lesson-number">07</span><span class="lesson-title">Wreck diving &amp; overhead limits<small>Specialty · Wrecks</small></span><span class="lesson-arrow">＋</span></button><div class="lesson-body"><p>Wreck exteriors and wreck penetration are different risk levels. Do not enter an overhead environment without the specific training, equipment, gas planning, and team procedures for that penetration.</p><p><strong>Places to research:</strong> Chuuk Lagoon (often called Truk Lagoon) is famous for wrecks. Many sites are deep or penetrative; choose dives strictly within your qualifications and guide plan.</p></div></article>
-          <article class="lesson"><button class="lesson-toggle"><span class="lesson-number">08</span><span class="lesson-title">Cavern &amp; cave diving<small>Overhead · Separate training</small></span><span class="lesson-arrow">＋</span></button><div class="lesson-body"><p>Cavern, cave, and wreck penetration require distinct training and equipment. Never pass a cavern's daylight/route limits or enter a cave without recognized cave-diving certification and a qualified team.</p><p><strong>Places to research:</strong> The Yucatán cenotes near Tulum have guided cavern experiences; ask whether a dive stays in the cavern zone and match it to your certification.</p></div></article>
-          <article class="lesson"><button class="lesson-toggle"><span class="lesson-number">09</span><span class="lesson-title">Night &amp; fluoro dives<small>Specialty · Low light</small></span><span class="lesson-arrow">＋</span></button><div class="lesson-body"><p>Review light, communication, navigation, and buddy procedures before dark. Fluoro dives use dedicated lights and viewing filters; they are a specialty experience, not a reason to touch or disturb marine life.</p><p><strong>Places to research:</strong> Bonaire has popular guided night dives; a few local operators offer fluorescence trips. Confirm equipment, conditions, and availability in advance.</p></div></article>
-          <article class="lesson"><button class="lesson-toggle"><span class="lesson-number">10</span><span class="lesson-title">Muck &amp; macro<small>Specialty · Small wonders</small></span><span class="lesson-arrow">＋</span></button><div class="lesson-body"><p>Move slowly, maintain excellent buoyancy, and keep hands, fins, and camera gear off the bottom. Ask your guide how to observe small creatures without moving or handling them.</p><p><strong>Places to research:</strong> Lembeh Strait in Indonesia and Anilao in the Philippines are well-known macro destinations; seasonal life and conditions vary.</p></div></article>
-          <article class="lesson"><button class="lesson-toggle"><span class="lesson-number">11</span><span class="lesson-title">Dry suit &amp; cold-water diving<small>Specialty · Thermal protection</small></span><span class="lesson-arrow">＋</span></button><div class="lesson-body"><p>A dry suit changes buoyancy and thermal planning. Get appropriate training, use suitable undergarments, check seals and valves, and dive within your recent cold-water experience.</p><p><strong>Places to research:</strong> Silfra in Iceland is a cold, clear-water dry-suit destination; operators require specific preparation and conditions can be strenuous.</p></div></article>
-          <article class="lesson"><button class="lesson-toggle"><span class="lesson-number">12</span><span class="lesson-title">Shark cage experiences<small>Wildlife · Surface activity</small></span><span class="lesson-arrow">＋</span></button><div class="lesson-body"><p>Cage viewing is generally a surface activity rather than a scuba dive. Choose a licensed operator with clear animal-welfare and safety practices; follow their instructions and never enter the water outside the approved setup.</p><p><strong>Places to research:</strong> Gansbaai, South Africa is a known cage-viewing area. Confirm current local regulations, season, and operator practices.</p></div></article>
-          <article class="lesson"><button class="lesson-toggle"><span class="lesson-number">13</span><span class="lesson-title">Deep &amp; altitude dives<small>Specialty · Conservative limits</small></span><span class="lesson-arrow">＋</span></button><div class="lesson-body"><p>Depth and altitude change dive planning. Stay within your certification and computer limits, use conservative profiles, and get site-specific instruction for high-altitude diving. Do not treat a refresher as a substitute for a specialty course.</p><p><strong>Places to research:</strong> Cozumel's walls attract experienced divers; Lake Tahoe has high-altitude dive operations. Ask a local instructor about prerequisites and conditions.</p></div></article>
-          <article class="lesson"><button class="lesson-toggle"><span class="lesson-number">14</span><span class="lesson-title">Shore entries, surf &amp; low visibility<small>Conditions · Local briefing</small></span><span class="lesson-arrow">＋</span></button><div class="lesson-body"><p>Review entry/exit points, surf, surge, current, visibility, and an abort plan with a local professional. If access or visibility is outside your experience, choose a sheltered alternative or cancel.</p><p><strong>Places to research:</strong> Bonaire is known for shore-diving access; select a site matched to the day's surf and your experience rather than assuming every entry is easy.</p></div></article>
-          <article class="lesson"><button class="lesson-toggle"><span class="lesson-number">15</span><span class="lesson-title">Photography &amp; marine-life etiquette<small>Conservation · All dives</small></span><span class="lesson-arrow">＋</span></button><div class="lesson-body"><p>Keep buoyancy and awareness ahead of the shot. Maintain distance, do not chase, feed, touch, or block wildlife, and follow protected-area rules and your guide's site briefing.</p><p><strong>Places to research:</strong> Raja Ampat and the Coral Triangle offer remarkable biodiversity; use local guides and marine-park rules to plan responsible encounters.</p></div></article>
-          <article class="lesson"><button class="lesson-toggle"><span class="lesson-number">16</span><span class="lesson-title">Emergency skills &amp; post-dive planning<small>Safety · Refresh with an instructor</small></span><span class="lesson-arrow">＋</span></button><div class="lesson-body"><p>Review emergency procedures, surface-support signals, lost-buddy actions, and computer guidance with a qualified instructor. Keep certification current, maintain equipment, and follow your training for surface intervals and repetitive dives.</p><p><strong>Where to practice:</strong> Use a controlled training site with a certified instructor before relying on any skill in open water.</p></div></article>
-        </div><aside class="quiz"><div class="eyebrow">A quick check-in <span class="quiz-progress" id="quiz-progress">1 / 14</span></div><h3 id="quiz-title">Dive knowledge</h3><p id="quiz-question" aria-live="polite"></p><div id="quiz-options"></div><div class="quiz-nav"><button type="button" id="quiz-previous" aria-label="Previous refresher question">← Previous</button><button type="button" id="quiz-next">Next →</button></div><div class="quiz-feedback" id="quiz-feedback" aria-live="polite"></div></aside></div>
+    </section>
+    <section id="community" hidden>
+      <div class="explorer-heading"><div class="eyebrow">The surface interval / Community preview</div><h1>Good dives start with good company.</h1><p>Ask a question, find your next dive buddy, or give well-loved gear a new chapter. Every name, discussion, reply, and listing below is fictional sample content—not a live post or offer.</p></div>
+      <p class="editor-note">Try the forms with fictional details only. New previews appear in this tab until you refresh; nothing is uploaded, published, or saved to your account.</p>
+      <section aria-labelledby="gear-heading">
+      <div class="heading"><div><div class="eyebrow">Another chapter, another diver</div><h2 id="gear-heading" tabindex="-1">The gear exchange.</h2></div></div>
+      <details class="community-composer"><summary>＋ List gear</summary>
+        <form id="gear-preview-form" class="community-form">
+          <p class="editor-note">Publishing saves this listing to the community. Do not include sensitive personal information.</p>
+          <label>Item name<input name="title" required maxlength="100" placeholder="e.g. Mesh gear bag"></label>
+          <label>Listing type<select name="category"><option>For sale</option><option>To lend</option><option>Free to a good home</option><option>Wanted</option></select></label>
+          <label>Price in CHF (enter 0 for free, wanted, or loan)<input name="price" type="number" required min="0" step="0.01"></label>
+          <label>Condition<select name="condition"><option>Used</option><option>Like new</option><option>New</option><option>Needs repair</option><option>Not applicable</option></select></label>
+          <label>Description and arrangements<textarea name="body" required maxlength="1400" placeholder="Add model, size, condition, included accessories, and loan or collection arrangements."></textarea></label>
+          <label>Photos (up to 5, JPEG/PNG/WebP, 10 MB each)<input name="photos" type="file" multiple accept="image/jpeg,image/png,image/webp"></label>
+          <div id="gear-selected-photos"></div><p id="gear-photo-status" class="editor-note" role="status"></p>
+          <button class="button" type="submit">Publish listing</button>
+        </form>
+      </details>
+      <p id="gear-preview-status" class="editor-note" role="status"></p>
+      <p class="editor-note">Fictional listings with illustrative artwork. Prices and availability are examples only; no purchases, reservations, or contact details.</p>
+      <div class="gear-grid" id="community-gear">
+        <article class="gear-card"><svg class="gear-art" viewBox="0 0 100 120" aria-hidden="true"><use href="topic-pictures.svg#topic-14"/></svg><div class="eyebrow">For sale · Sample</div><h3>Underwater camera tray</h3><p><strong>€35 · Sam</strong><br>Tray and handles only. A little cosmetic wear, plenty of future adventures.</p><details><summary>View example details</summary><p>Camera, housing, and lights not included. A real listing would show the exact model, dimensions, mounting compatibility, condition, and the seller's own photographs.</p><p>This is a fictional offer. There is no seller to contact.</p></details></article>
+        <article class="gear-card"><svg class="gear-art" viewBox="0 0 100 120" aria-hidden="true"><use href="topic-pictures.svg#topic-8"/></svg><div class="eyebrow">To lend · Sample</div><h3>Compact dive torch</h3><p><strong>Loan · Jamie</strong><br>A sample idea for a colleague-to-colleague equipment loan.</p><details><summary>View example details</summary><p>A real loan should state the model, manufacturer depth rating, battery and charger requirements, condition, and return arrangements. Check function and suitability before use; don't assume a borrowed torch meets a dive's lighting requirements.</p><p>No equipment loan is available through this preview.</p></details></article>
+        <article class="gear-card"><div class="eyebrow">Free to a good home · Sample</div><h3>A well-travelled gear bag</h3><p><strong>Free · Alex</strong><br>A fictional mesh bag with room for a new set of adventures.</p><details><summary>View example details</summary><p>A real listing would include dimensions, clear photographs of the seams and zips, any damage, and collection arrangements. Equipment shown or described here is not an actual member's property.</p><p>This sample item cannot be claimed.</p></details></article>
+      </div>
+      <nav id="gear-pagination" class="community-pagination" aria-label="Gear listing pages"><button class="button" type="button" data-direction="-1">Previous</button><span role="status"></span><button class="button" type="button" data-direction="1">Next</button></nav>
+      <p class="editor-note">For a future live exchange: verify condition, ownership, fit, compatibility, and service history as applicable. Have life-support equipment assessed by an appropriately qualified technician. A community listing is not an endorsement or safety inspection.</p>
       </section>
-
-      <section class="page" id="page-shop">
-        <div class="page-heading"><div><div class="eyebrow">Good gear deserves another dive</div><h1>The gear exchange.</h1><p>Thoughtful finds and well-loved kit from the dive community.</p></div><button class="button" data-action="sell-item"><span class="icon">＋</span> List your gear</button></div>
-        <div class="shop-grid" id="shop-grid"></div>
-        <div class="shop-note"><strong>Buying used?</strong> Inspect equipment carefully, check service history and manufacturer guidance, and have life-support equipment inspected by a qualified technician before diving. Listings in this prototype are examples only.</div>
+      <section aria-labelledby="discussion-heading">
+      <div class="heading"><div><div class="eyebrow">Surface time</div><h2 id="discussion-heading" tabindex="-1">Community discussions.</h2></div></div>
+      <details class="community-composer"><summary>＋ Ask the community</summary>
+        <form id="question-preview-form" class="community-form">
+          <p class="editor-note">Your question will be shared with signed-in community members.</p>
+          <label>Topic<select name="category"><option>Destination tips</option><option>Find a buddy</option><option>Photography</option><option>Equipment</option><option>Shared experiences</option></select></label>
+          <label>Your question<input name="title" required maxlength="140" placeholder="What would you like to ask?"></label>
+          <label>A little context<textarea name="body" required maxlength="2000" placeholder="Share helpful context without sensitive personal or medical information."></textarea></label>
+          <button class="button" type="submit">Post question</button>
+        </form>
+      </details>
+      <p id="question-preview-status" class="editor-note" role="status"></p>
+      <div class="community-layout"><div><div id="community-questions">
+        <article class="community-thread"><div class="eyebrow">Destination tips · Fictional discussion</div><h3>Gozo without the rush—where would you start?</h3><p>Alex · Sample member</p><p>Planning a few days in Gozo and hoping to mix diving with slow afternoons. What would you ask a local dive center before choosing the sites?</p><details><summary>Read 2 example replies</summary><div class="sample-reply"><p><strong>Jamie:</strong> I'd ask how they choose sheltered alternatives when the wind changes, and how demanding the shore entries and exits are.</p></div><div class="sample-reply"><p><strong>Arielle:</strong> Tell them your recent experience and comfort level too. I'd leave the final site choices flexible rather than book around a single must-do spot.</p></div></details></article>
+        <article class="community-thread"><div class="eyebrow">Find a buddy · Fictional request</div><h3>A gentle weekend back in the water?</h3><p>Sam · Sample member</p><p>Thinking about a supervised refresher and an easy local dive afterward. Anyone interested in making a relaxed weekend of it? Dates and location are just examples.</p><details><summary>Read 1 example reply</summary><div class="sample-reply"><p><strong>Alex:</strong> I'd be interested in discussing it! Let's compare our training and recent experience, then ask a local center what preparation and conditions would suit us both.</p></div></details></article>
+        <article class="community-thread"><div class="eyebrow">Photography · Fictional discussion</div><h3>What helped you enjoy a camera without missing the dive?</h3><p>Arielle · Sample member</p><p>I'm curious about keeping photography simple. What habits helped you stay aware of your buddy and the reef while taking pictures?</p><details><summary>Read 2 example replies</summary><div class="sample-reply"><p><strong>Sam:</strong> Getting comfortable with buoyancy before adding the camera made the biggest difference. Some dives I leave it behind and just enjoy the view.</p></div><div class="sample-reply"><p><strong>Jamie:</strong> Agree expectations with your buddy first, keep checking in, and let the shot go if it would require touching habitat or following an animal.</p></div></details></article>
+        <article class="community-thread"><div class="eyebrow">Shared experiences · Fictional discussion</div><h3>Your first night dive—in one unforgettable moment?</h3><p>Jamie · Sample member</p><p>For me it was noticing how different a familiar reef felt after sunset. What stayed with you?</p><details><summary>Read 1 example reply</summary><div class="sample-reply"><p><strong>Alex:</strong> The quiet little details in the torch beam. Having a thorough briefing and an experienced local professional made it easier to appreciate them.</p></div></details></article>
+      </div><nav id="question-pagination" class="community-pagination" aria-label="Discussion pages"><button class="button" type="button" data-direction="-1">Previous</button><span role="status"></span><button class="button" type="button" data-direction="1">Next</button></nav>
+      </div><aside class="community-note"><div class="eyebrow">Our community code</div><h3>Share generously.<br>Dive thoughtfully.</h3><p>Be welcoming. Credit photographers. Respect privacy and marine life. Personal experiences are not professional instruction or medical advice.</p><p>Buddy requests aren't a check of someone's qualifications. Discuss experience and expectations, and use appropriate local professional support.</p><p><strong>Preview only:</strong> Forms add temporary examples to this tab, not live posts. Replies expand for illustration. Messaging, voting, and transactions are not enabled. Nothing is saved or sent.</p></aside></div>
       </section>
-    </main>
-  </div>
-  <dialog id="dive-dialog"><div class="modal-head"><div><div class="eyebrow">Your dive log</div><h2 id="dive-dialog-title">Log a dive</h2></div><button class="modal-close" data-close aria-label="Close">×</button></div><form id="dive-form" class="modal-form"><div class="field-row"><div class="field"><label for="dive-place">Dive site or place *</label><input id="dive-place" name="place" required placeholder="e.g. Blue Corner"></div><div class="field"><label for="dive-country">Country *</label><input id="dive-country" name="country" required placeholder="e.g. Palau"></div></div><div class="field-row"><div class="field"><label for="dive-date">Date</label><input id="dive-date" name="date" type="date"></div><div class="field"><label for="dive-depth">Max depth (metres)</label><input id="dive-depth" name="depth" type="number" min="0" max="300" step="0.1" placeholder="18"></div></div><div class="field"><label for="dive-highlight">What made this dive special?</label><textarea id="dive-highlight" name="highlight" placeholder="A manta glided through the blue..."></textarea></div><div class="field"><label class="file-label"><input id="dive-photo" name="photo" type="file" accept="image/*"><span class="icon">↥</span><span>Choose up to 10 dive photos</span><span class="file-name" id="dive-photo-name">Optional</span></label></div><div class="form-actions"><button class="button outline" type="button" data-close>Cancel</button><button class="button" type="submit">Save this dive</button></div></form></dialog>
-  <dialog id="question-dialog"><div class="modal-head"><div><div class="eyebrow">Ask the community</div><h2>Start a conversation</h2></div><button class="modal-close" data-close aria-label="Close">×</button></div><form id="question-form" class="modal-form"><div class="field"><label for="question-title">Your question *</label><input id="question-title" name="title" required placeholder="What would you like to know?"></div><div class="field"><label for="question-category">Topic</label><select id="question-category" name="category"><option>Travel</option><option>Skills</option><option>Gear</option></select></div><div class="field"><label for="question-detail">More detail</label><textarea id="question-detail" name="detail" placeholder="Add context so divers can give you a useful answer..."></textarea></div><div class="form-actions"><button class="button outline" type="button" data-close>Cancel</button><button class="button" type="submit">Post question</button></div></form></dialog>
-  <dialog id="sell-dialog"><div class="modal-head"><div><div class="eyebrow">Pass it on</div><h2>List your gear</h2></div><button class="modal-close" data-close aria-label="Close">×</button></div><form id="sell-form" class="modal-form"><div class="field"><label for="product-name">Item name *</label><input id="product-name" name="name" required placeholder="e.g. Travel BCD, size M"></div><div class="field-row"><div class="field"><label for="product-price">Price *</label><input id="product-price" name="price" required type="number" min="0" placeholder="150"></div><div class="field"><label for="product-condition">Condition</label><select id="product-condition" name="condition"><option>Pre-loved</option><option>Like new</option><option>New</option></select></div></div><div class="field"><label for="product-description">A few details</label><textarea id="product-description" name="description" placeholder="Size, age, service history..."></textarea></div><div class="field"><label class="file-label"><input id="product-photos" type="file" accept="image/*" multiple><span class="icon">↥</span><span>Choose up to 5 gear photos</span><span class="file-name" id="product-photo-count">Optional</span></label><div class="photo-preview-grid" id="product-photo-previews"></div></div><div class="form-actions"><button class="button outline" type="button" data-close>Cancel</button><button class="button" type="submit">Publish listing</button></div></form></dialog>
-  <dialog id="photo-dialog" class="photo-dialog" aria-label="Dive photo"><button class="modal-close" data-close aria-label="Close photo">×</button><img id="expanded-dive-photo" alt=""><div class="photo-viewer-controls"><button type="button" id="photo-viewer-previous" aria-label="Previous photo">←</button><span id="photo-viewer-position"></span><button type="button" id="photo-viewer-next" aria-label="Next photo">→</button></div></dialog>
-  <dialog id="profile-dialog"><div class="modal-head"><div><div class="eyebrow">Your dive identity</div><h2>Create your profile</h2></div><button class="modal-close" data-close aria-label="Close">×</button></div><form id="profile-form" class="modal-form"><div class="field"><label for="profile-username">Username *</label><input id="profile-username" name="username" required maxlength="32" autocomplete="username" placeholder="e.g. bluefins"></div><div class="field"><label class="file-label"><input id="profile-photo-input" type="file" accept="image/*"><span class="icon">↥</span><span>Choose a profile photo</span><span class="file-name" id="profile-photo-name">Optional</span></label></div><p class="profile-note">Prototype profile only: your name and photo stay in this browser. Secure sign-in and sharing between devices need a connected account service.</p><div class="form-actions"><button class="button outline" type="button" data-close>Cancel</button><button class="button" type="submit">Save profile</button></div></form></dialog>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-  <dialog id="signin-dialog"><div class="modal-head"><div><div class="eyebrow">Join the dive community</div><h2>Email and password</h2></div><button class="modal-close" data-close aria-label="Close">×</button></div><form id="signin-form" class="modal-form"><div class="field"><label for="signin-mode">Account action</label><select id="signin-mode"><option value="signin">Sign in</option><option value="signup">Create account</option></select></div><div class="field"><label for="signin-email">Your email address</label><input id="signin-email" type="email" required autocomplete="username"></div><div class="field"><label for="signin-password">Password</label><input id="signin-password" type="password" required autocomplete="current-password"></div><div id="signup-confirm-field" class="field" hidden><label for="signup-confirm">Confirm password</label><input id="signup-confirm" type="password" autocomplete="new-password" disabled></div><p>Anyone can create an account and access community logs and photos. Email addresses are not verified. Use your own address and a unique password of at least 8 characters, not your Gmail or work password.</p><p>Forgot your password? Contact the community administrator for identity verification and a manual reset. Automatic recovery emails are not configured.</p><p id="signin-status" role="status"></p><div class="form-actions"><button class="button outline" type="button" data-close>Cancel</button><button class="button" type="submit">Sign in</button></div></form></dialog>
-  <dialog id="password-dialog"><div class="modal-head"><h2>Set a new password</h2><button class="modal-close" data-close aria-label="Close">×</button></div><form id="password-form" class="modal-form"><p>This changes the password for your signed-in account. Existing email-link users can set their first password here.</p><div class="field"><label for="new-password">New password</label><input id="new-password" type="password" required minlength="8" autocomplete="new-password"></div><div class="field"><label for="confirm-password">Confirm new password</label><input id="confirm-password" type="password" required minlength="8" autocomplete="new-password"></div><p id="password-status" role="status"></p><div class="form-actions"><button class="button outline" type="button" data-close>Cancel</button><button class="button" type="submit">Save password</button></div></form></dialog>
+    </section>
+    <footer><span>OneAD DIVE COMPASS<br>For the moments between descents.</span><span>Community principle: share generously, credit photographers, respect the ocean.<br>Member photos belong to their respective owners. Dive knowledge is independent educational material, not a substitute for training.</span></footer>
+  </main>
+  <dialog id="connected-dive-dialog" aria-labelledby="connected-dive-heading">
+    <h2 id="connected-dive-heading">Log a dive.</h2>
+    <form id="connected-dive-form" class="connected-form">
+      <label>Dive site<input name="place" required maxlength="120"></label>
+      <label>Country<input name="country" required maxlength="80"></label>
+      <label>Date<input name="date" type="date" required></label>
+      <label>Maximum depth in metres (optional)<input name="depth" type="number" min="0" step="0.1"></label>
+      <label>Your dive story<textarea name="highlight" maxlength="1000"></textarea></label>
+      <label>Photos (up to 10, JPEG/PNG/WebP, 10 MB each)<input name="photos" type="file" multiple accept="image/jpeg,image/png,image/webp"></label>
+      <p class="editor-note">Choose more photos to add to your selection. Remove a picture, then choose another to replace it. Nothing is uploaded until you save.</p>
+      <div id="selected-dive-photos" aria-label="Selected photos"></div>
+      <button id="clear-dive-photos" class="text-button" type="button" hidden>Clear selection</button>
+      <p id="selected-photo-status" class="editor-note" role="status"></p>
+      <p class="editor-note" id="dive-photo-help">Choose photos, then select which one should appear first.</p>
+      <label>Main photo<select name="mainPhoto" disabled><option value="0">Select photos first</option></select></label>
+      <img id="dive-photo-preview" class="dive-photo-preview" alt="Selected main photo preview" hidden>
+      <button class="button" type="submit">Save dive</button>
+    </form>
+    <p id="dive-save-status" role="status" aria-live="polite"></p>
+    <button class="text-button" id="close-dive-dialog" type="button">Cancel</button>
+  </dialog>
+  <dialog id="delete-dive-dialog" aria-labelledby="delete-dive-heading">
+    <h2 id="delete-dive-heading">Delete this dive?</h2><p id="delete-dive-description"></p>
+    <p>This permanently deletes the dive and its uploaded photos from your existing account. It cannot be undone.</p>
+    <button class="button" id="confirm-delete-dive" type="button">Delete permanently</button>
+    <button class="text-button" id="cancel-delete-dive" type="button">Cancel</button><p id="delete-dive-status" role="status"></p>
+  </dialog>
+  <dialog id="account-dialog" aria-labelledby="account-heading">
+    <h2 id="account-heading">Welcome aboard.</h2>
+    <form id="connected-auth" class="connected-form">
+      <label>Email<input name="email" type="email" autocomplete="email" required maxlength="254"></label>
+      <label>Password<input name="password" type="password" autocomplete="current-password" required minlength="8"></label>
+      <label><span><input id="show-auth-password" type="checkbox"> Show password</span></label>
+      <div class="account-actions"><button class="button" name="action" value="signin">Sign in</button><button class="button pale" name="action" value="signup">Create account</button></div>
+    </form>
+    <p id="auth-status" role="status"></p><form method="dialog"><button class="text-button">Close</button></form>
+  </dialog>
+  <dialog id="connected-profile-dialog" aria-labelledby="connected-profile-heading">
+    <h2 id="connected-profile-heading">Your dive identity.</h2>
+    <form id="connected-profile" class="connected-form">
+      <label>Username<input name="username" required maxlength="32" autocomplete="nickname"></label>
+      <label>Profile picture (optional, JPEG/PNG/WebP, up to 10 MB)<input name="photo" type="file" accept="image/jpeg,image/png,image/webp"></label>
+      <p class="editor-note">Saving updates your existing account, including on the original website. Leave the photo field empty to keep your current picture.</p>
+      <button class="button">Save profile</button>
+    </form><p id="profile-status" role="status"></p><form method="dialog"><button class="text-button">Close</button></form>
+  </dialog>
+  <dialog id="story-dialog" aria-labelledby="story-title"><div class="eyebrow">A sample page from the field journal</div><h2 id="story-title"></h2><p id="story-copy"></p><p class="editor-note">Fictional preview story. A live version would use a member's own words and photos with permission.</p><form method="dialog"><button class="button">Back to the journal</button></form></dialog>
+  <script src="knowledge-checks.js"></script>
+  <script src="knowledge-topics.js"></script>
+  <script>
+    const reefQuestions = [
+      { question:"You are hovering above a coral garden. What best protects the reef?", answers:["Rest a fin on a clear-looking patch of coral.", "Maintain controlled buoyancy and keep fins, hands, and equipment clear.", "Hold a coral branch while adjusting your camera."], correct:1, explanation:"Keep yourself and your equipment clear of the reef. If buoyancy is difficult, seek appropriate practice with a dive professional rather than using the reef for support." },
+      { question:"A small nudibranch is partly hidden. How should you photograph it?", answers:["Move it gently into better light.", "Ask your buddy to turn the rock over.", "Photograph it as it is, or leave it undisturbed if a safe shot is not possible."], correct:2, explanation:"Do not handle, reposition, or disturb animals and their habitat for a photograph. A missed shot is better than a disturbed animal." },
+      { question:"A turtle is moving away from your group. What is the respectful response?", answers:["Give it space and allow it to leave without chasing or blocking it.", "Swim ahead to block its path for a photograph.", "Offer food so it stays nearby."], correct:0, explanation:"Allow wildlife to choose its distance and direction. Do not chase, touch, feed, or obstruct it, and follow local wildlife-viewing rules." },
+      { question:"You notice fishing line tangled on a reef. What should you do?", answers:["Pull it free immediately, even if it is wrapped around coral.", "Tell your guide; avoid handling hazards or removing material beyond your training.", "Ignore your buddy and follow it until you find the end."], correct:1, explanation:"Entanglement, sharp objects, and attached organisms can make removal hazardous. Report the location to your guide or an appropriate local cleanup team rather than improvising." },
+      { question:"A guide explains that a site has stricter wildlife and photography rules. Which approach is best?", answers:["Use the rules from your last holiday instead.", "Assume the rules only apply to inexperienced divers.", "Follow the local restrictions and ask for clarification before entering."], correct:2, explanation:"Local conservation and access requirements can differ between sites. Understand the briefing and respect restrictions even when they are stricter than what you have encountered elsewhere." }
+    ];
+    reefQuestions.push(...additionalReefQuestions);
+    const knowledgeChecks = [{ title:"Reef-side manners", questions:reefQuestions }, ...otherKnowledgeChecks];
+    const quizTopic = document.getElementById("quiz-topic");
+    knowledgeChecks.forEach((check, index) => {
+      quizTopic.add(new Option(`${check.title} (${check.questions.length} questions)`, String(index)));
+    });
+    let activeQuestions = reefQuestions;
+    let reefQuestionIndex = 0;
+    let reefQuizScore = 0;
+    const quizQuestion = document.getElementById("quiz-question");
+    const quizOptions = document.getElementById("quiz-options");
+    const quizNext = document.getElementById("quiz-next");
+    const quizRestart = document.getElementById("quiz-restart");
+    function renderReefQuestion() {
+      const question = activeQuestions[reefQuestionIndex];
+      document.getElementById("quiz-progress").textContent = `Question ${reefQuestionIndex + 1} of ${activeQuestions.length}`;
+      quizQuestion.textContent = question.question;
+      document.getElementById("quiz-feedback").textContent = "";
+      quizNext.hidden = true;
+      quizRestart.hidden = true;
+      quizOptions.replaceChildren();
+      question.answers.forEach((answer, index) => {
+        const button = document.createElement("button");
+        button.className = "quiz-option";
+        button.textContent = answer;
+        button.addEventListener("click", () => {
+          const correct = index === question.correct;
+          if (correct) reefQuizScore++;
+          Array.from(quizOptions.children).forEach((option, optionIndex) => {
+            option.disabled = true;
+            if (optionIndex === question.correct) option.classList.add("correct");
+          });
+          if (!correct) button.classList.add("incorrect");
+          document.getElementById("quiz-feedback").textContent = `${correct ? "Correct." : "Not quite. The best choice is: " + question.answers[question.correct]} ${question.explanation}`;
+          quizNext.textContent = reefQuestionIndex === activeQuestions.length - 1 ? "See your review →" : "Next question →";
+          quizNext.hidden = false;
+          quizNext.focus({ preventScroll:true });
+        });
+        quizOptions.append(button);
+      });
+    }
+    quizNext.addEventListener("click", () => {
+      reefQuestionIndex++;
+      if (reefQuestionIndex < activeQuestions.length) renderReefQuestion();
+      else {
+        quizQuestion.textContent = "Review complete. Keep learning.";
+        document.getElementById("quiz-progress").textContent = "Knowledge check complete";
+        quizOptions.replaceChildren();
+        document.getElementById("quiz-feedback").textContent = `You answered ${reefQuizScore} of ${activeQuestions.length} correctly. Revisit the explanations and bring questions to your dive professional. This score does not assess practical skills or readiness to dive.`;
+        quizNext.hidden = true;
+        quizRestart.hidden = false;
+      }
+      quizQuestion.focus({ preventScroll:true });
+    });
+    quizRestart.addEventListener("click", () => {
+      reefQuestionIndex = 0;
+      reefQuizScore = 0;
+      renderReefQuestion();
+      quizQuestion.focus({ preventScroll:true });
+    });
+    quizTopic.addEventListener("change", () => {
+      const check = knowledgeChecks[Number(quizTopic.value)];
+      activeQuestions = check.questions;
+      document.getElementById("quiz-title").textContent = check.title + ".";
+      reefQuestionIndex = 0;
+      reefQuizScore = 0;
+      renderReefQuestion();
+    });
+    renderReefQuestion();
+    const reefColors = ["#ba8ed6", "#ef9c72", "#76b5cf", "#db7ba7", "#84c7b6", "#e2c583"];
+    const reefFans = document.getElementById("reef-fans");
+    function growCoral(x, y, length, angle, depth, color) {
+      const endX = x + Math.sin(angle) * length;
+      const endY = y - Math.cos(angle) * length;
+      const branch = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      branch.setAttribute("d", `M${x} ${y}Q${x + Math.sin(angle + .18) * length * .5} ${y - Math.cos(angle) * length * .5} ${endX} ${endY}`);
+      branch.setAttribute("fill", "none");
+      branch.setAttribute("stroke", color);
+      branch.setAttribute("stroke-width", String(depth * 1.1 + .4));
+      branch.setAttribute("stroke-linecap", "round");
+      reefFans.append(branch);
+      if (depth > 0) {
+        growCoral(endX, endY, length * .72, angle - .48, depth - 1, color);
+        growCoral(endX, endY, length * .69, angle + .43, depth - 1, color);
+      }
+    }
+    growCoral(36, 274, 44, -.15, 5, "#c18b8e");
+    growCoral(589, 280, 48, .05, 5, "#a28cb9");
+    growCoral(506, 278, 25, -.2, 4, "#cfb394");
+    const reefAnimals = document.getElementById("reef-nudibranchs");
+    for (let index = 0; index < 38; index++) {
+      const animal = document.createElementNS("http://www.w3.org/2000/svg", "use");
+      animal.setAttribute("href", ["#sea-slug", "#striped-slug", "#aeolid-slug", "#spotted-slug"][index % 4]);
+      const column = index % 10;
+      const row = Math.floor(index / 10);
+      const x = 104 + column * 43 + (row % 2) * 8 + Math.sin(index * 4.1) * 7;
+      const y = 151 + row * 41 + Math.sin(index * 2.3) * 12;
+      const scale = 0.48 + (index % 3) * 0.08;
+      animal.setAttribute("transform", `translate(${x} ${y}) rotate(${(index * 37) % 70 - 35}) scale(${scale})`);
+      animal.style.color = reefColors[index % reefColors.length];
+      reefAnimals.append(animal);
+    }
+    const stories = {
+      blue: { title:"The blue hour.", copy:"The light changed first. A silver ribbon at the edge of the reef, then a deep blue that seemed to go on forever. Back on the boat, the conversation was full of the little things we had each noticed. That is the part I wanted to write down." },
+      reef: { title:"A thousand tiny worlds.", copy:"We had come for the sweeping reef views. What I remembered was a tiny patch of color, an unexpected movement, and the feeling that every quiet corner held another story. Some dives make you want to travel farther. This one made me want to look closer." },
+      home: { title:"A place to return to.", copy:"I recognized the shape of the reef, but not the afternoon light. My buddy noticed something I had missed on the last visit. A familiar place had become a new memory. We were already talking about coming back before we reached shore." }
+    };
+    document.querySelectorAll("[data-story]").forEach(button => button.addEventListener("click", () => {
+      const story = stories[button.dataset.story];
+      document.getElementById("story-title").textContent = story.title;
+      document.getElementById("story-copy").textContent = story.copy;
+      document.getElementById("story-dialog").showModal();
+    }));
+    function showPage(name) {
+      ["home", "knowledge", "destinations", "community", "logbook"].forEach(id => { document.getElementById(id).hidden = id !== name; });
+      document.querySelectorAll("nav [data-page]").forEach(button => {
+        if (button.dataset.page === name) button.setAttribute("aria-current", "page");
+        else button.removeAttribute("aria-current");
+      });
+      document.getElementById("notice").hidden = true;
+      window.scrollTo({ top:0, behavior:"instant" });
+    }
+    function filterTopics(name) {
+      document.querySelectorAll("[data-group]").forEach(group => { group.hidden = group.dataset.group !== name; });
+      document.querySelectorAll("[data-filter]").forEach(button => { button.setAttribute("aria-pressed", String(button.dataset.filter === name)); });
+    }
+    document.querySelectorAll("[data-page]").forEach(button => button.addEventListener("click", () => showPage(button.dataset.page)));
+    const destinationButton = document.querySelector(".destination button");
+    destinationButton.removeAttribute("data-demo");
+    destinationButton.addEventListener("click", () => showPage("destinations"));
+    function selectCountry(country) {
+      document.querySelectorAll("[data-country]").forEach(button => {
+        button.setAttribute("aria-pressed", String(button.dataset.country === country));
+      });
+      document.querySelectorAll("[data-country-marker]").forEach(marker => {
+        marker.setAttribute("aria-pressed", String(marker.dataset.countryMarker === country));
+      });
+      let count = 0;
+      document.querySelectorAll("[data-dive-country]").forEach(card => {
+        card.hidden = country !== "All" && card.dataset.diveCountry !== country;
+        if (!card.hidden) count++;
+      });
+      document.getElementById("destination-title").textContent = country === "All" ? "Across our blue planet." : `Field notes from ${country}.`;
+      document.getElementById("destination-count").textContent = country === "All"
+        ? `${count} sample entries · 3 countries` : `${count} sample entry · ${country}`;
+    }
+    document.querySelectorAll("[data-country]").forEach(button => button.addEventListener("click", () => selectCountry(button.dataset.country)));
+    document.querySelectorAll("[data-country-marker]").forEach(marker => {
+      marker.addEventListener("click", () => selectCountry(marker.dataset.countryMarker));
+      marker.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          selectCountry(marker.dataset.countryMarker);
+        }
+      });
+    });
+    document.querySelector(".brand").addEventListener("click", event => { event.preventDefault(); showPage("home"); });
+    document.querySelectorAll("[data-filter]").forEach(button => button.addEventListener("click", () => filterTopics(button.dataset.filter)));
+    document.querySelectorAll("[data-filter-link]").forEach(button => button.addEventListener("click", () => {
+      filterTopics(button.dataset.filterLink);
+      document.querySelector(".tabs").scrollIntoView({ behavior:"smooth", block:"start" });
+    }));
+    document.querySelectorAll("[data-demo]").forEach(button => button.addEventListener("click", () => {
+      const notice = document.getElementById("notice");
+      notice.textContent = button.dataset.demo;
+      notice.hidden = false;
+      notice.scrollIntoView({ behavior:"smooth", block:"center" });
+    }));
+  </script>
+  <script src="dive-wheel.js"></script>
+  <script src="photo-processing.js"></script>
+  <script src="community-replies.js"></script>
+  <script src="community-preview.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="supabase-backend.js"></script>
-  <script>
-    const sampleDives = [];
-    const sampleQuestionTitles = new Set([
-      "Which liveaboard route is best for a first trip to Raja Ampat?",
-      "Any tips for getting more relaxed with buoyancy in a drysuit?",
-      "Compact camera setup for someone who mostly travels carry-on?"
-    ]);
-    const sampleProductNames = new Set(["Oceanic Geo 4.0", "Reef-safe travel BCD", "Low-volume mask"]);
-    const countryFlags = { Egypt: "🇪🇬", Maldives: "🇲🇻", Fiji: "🇫🇯", Mexico: "🇲🇽", Indonesia: "🇮🇩", Australia: "🇦🇺", Thailand: "🇹🇭", Philippines: "🇵🇭", Palau: "🇵🇼" };
-    const worldMapSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 180"><defs><linearGradient id="water" x2="0" y2="1"><stop stop-color="#d4e9f3"/><stop offset="1" stop-color="#b9d8e7"/></linearGradient><pattern id="ripples" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M0 9q4-3 9 0t9 0" fill="none" stroke="#4f91ae" stroke-opacity=".12" stroke-width=".5"/></pattern></defs><rect width="360" height="180" fill="url(#water)"/><rect width="360" height="180" fill="url(#ripples)"/><g stroke="#8daebd" stroke-width=".35" stroke-dasharray="1.5 2" fill="none"><path d="M0 30h360M0 60h360M0 90h360M0 120h360M0 150h360M30 0v180M60 0v180M90 0v180M120 0v180M150 0v180M180 0v180M210 0v180M240 0v180M270 0v180M300 0v180M330 0v180"/></g><g transform="matrix(1 0 0 -1 180 90)" fill="#8fb8c9" stroke="#638fa4" stroke-width=".8" stroke-linejoin="round"><path d="M-168 68-151 72-137 69-130 60-123 55-127 48-124 41-117 33-110 30-107 24-98 22-96 17-89 15-84 9-79 9-77 15-82 22-80 27-75 34-68 42-61 47-58 52-65 57-75 60-84 65-98 70-112 73-129 72-145 71-160 70z"/><path d="M-92 15-87 13-84 10-82 8-78 8-77 11-80 9-82 14-86 16z"/><path d="M-53 59-48 69-42 75-35 78-28 75-22 70-19 63-24 59-31 60-37 57-44 58z"/><path d="M-79 9-72 11-67 8-62 10-57 6-52 3-49-2-50-8-46-15-40-20-42-27-48-34-53-40-58-49-64-54-70-51-74-44-75-35-78-25-80-15-81-5z"/><path d="M-10 35-10 43-6 49-1 51 3 56 9 55 14 54 20 57 26 58 31 62 39 60 45 57 53 56 61 59 70 58 78 60 86 58 95 58 105 55 114 56 122 53 131 55 139 51 148 54 156 61 166 61 175 65 179 59 173 54 167 51 161 46 153 44 148 40 141 38 136 35 130 33 125 29 121 25 115 22 111 18 105 16 101 11 96 10 93 16 88 20 83 21 78 18 74 20 70 23 66 23 62 27 57 26 53 29 48 29 44 33 39 34 35 38 31 37 28 41 24 40 20 43 16 44 12 42 8 44 4 42 0 40-4 41-8 38z"/><path d="M-17 35-10 36-7 42-1 44 5 43 9 46 15 45 20 49 25 48 30 51 36 50 42 55 48 56 55 54 61 57 67 58 73 61 80 60 86 57 93 58 100 55 108 55 115 52 121 54 127 51 134 53 141 49 147 51 153 47 158 50 164 54 170 56 177 61 176 66 168 69 161 67 155 62 149 60 145 56 140 54 136 49 132 47 129 44 125 41 121 39 118 36 114 34 110 32 107 29 103 27 100 24 96 22 92 20 88 18 85 15 82 13 79 10 76 7 73 5 70 6 68 9 65 10 63 13 60 14 57 17 54 19 52 22 49 24 46 27 44 30 41 33 38 35 34 37 30 39 27 41 23 43 19 44 15 46 11 47 7 46 3 44 0 42-4 41-8 40-12 39-15 38z"/><path d="M112-11 115-22 121-28 129-32 137-36 145-38 151-34 153-27 150-20 146-16 141-12 136-10 131-12 126-14 121-13 116-12z"/><path d="M138 36 140 39 142 41 144 40 143 37zM129 31 132 34 134 37 137 39 139 37 138 34 135 32zM95 20 99 18 103 15 107 12 111 8 115 6 119 8 121 12 118 15 114 18 110 20 106 22 102 24 98 25z"/><path d="M-180-76-165-73-150-75-135-72-120-75-105-72-90-74-75-71-60-74-45-72-30-75-15-72 0-74 15-71 30-75 45-72 60-74 75-71 90-74 105-72 120-75 135-72 150-74 165-72 180-75V-90H-180z" opacity=".6"/></g></svg>`;
-    const worldMapImageUrl = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(worldMapSvg);
-    const readStore = (key, fallback) => { try { const value = localStorage.getItem(key); return value ? JSON.parse(value) : fallback; } catch { return fallback; } };
-    const workspaceMode = typeof google !== "undefined" && Boolean(google.script && google.script.run);
-    const supabaseMode = !workspaceMode;
-    const sharedMode = workspaceMode || supabaseMode;
-    let communitySignedIn = false;
-    const createDiveId = () => globalThis.crypto?.randomUUID?.() || `dive-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const sampleDiveKeys = new Set(["Manta Point|Maldives", "The Canyon|Egypt", "Shark Reef|Fiji"]);
-    const storedDives = sharedMode ? [] : readStore("dive-atlas-dives", []);
-    const filteredDives = storedDives.filter(dive => dive.diver || !sampleDiveKeys.has(`${dive.place}|${dive.country}`));
-    const needsDiveMigration = filteredDives.some(dive => !dive.id);
-    let dives = filteredDives.map(dive => ({ ...dive, id: dive.id || createDiveId() }));
-    if (!sharedMode && (dives.length !== storedDives.length || needsDiveMigration)) { try { localStorage.setItem("dive-atlas-dives", JSON.stringify(dives)); } catch {} }
-    const storedQuestions = sharedMode ? [] : readStore("dive-atlas-questions", []);
-    let questions = storedQuestions.filter(question => !sampleQuestionTitles.has(question.title));
-    if (!sharedMode && questions.length !== storedQuestions.length) {
-      try { localStorage.setItem("dive-atlas-questions", JSON.stringify(questions)); } catch {}
-    }
-    const storedProducts = sharedMode ? [] : readStore("dive-atlas-products", []);
-    let products = storedProducts.filter(product => !sampleProductNames.has(product.name));
-    if (!sharedMode && products.length !== storedProducts.length) {
-      try { localStorage.setItem("dive-atlas-products", JSON.stringify(products)); } catch {}
-    }
-    let profilePhoto = sharedMode ? "" : (localStorage.getItem("dive-atlas-profile") || "");
-    let profileName = sharedMode ? "" : (localStorage.getItem("dive-atlas-user") || "");
-    const localOwnerId = sharedMode ? "" : (localStorage.getItem("dive-atlas-user-id") || (() => {
-      const id = globalThis.crypto?.randomUUID?.() || `user-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      try { localStorage.setItem("dive-atlas-user-id", id); } catch {}
-      return id;
-    })());
-    const persist = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch { showToast("Storage is full. Try a smaller photo."); } };
-    function callBackend(method, payload, onSuccess) {
-      if (workspaceMode) {
-        const runner = google.script.run
-          .withFailureHandler(error => showToast(error && error.message ? error.message : "Workspace request failed."))
-          .withSuccessHandler(onSuccess);
-        if (payload == null) runner[method]();
-        else runner[method](payload);
-        return true;
-      }
-      if (!supabaseMode) return false;
-      if (!window.DiveCompassSupabase) { showToast("Supabase did not load. Check your connection and reload."); return true; }
-      DiveCompassSupabase.call(method, payload).then(onSuccess).catch(error => showToast(error && error.message ? error.message : "Community request failed."));
-      return true;
-    }
-    const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
-    const niceDate = date => date ? new Date(date + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "New dive";
-    const photosForDive = dive => Array.isArray(dive.photos) && dive.photos.length ? dive.photos : (dive.photo ? [dive.photo] : []);
-    const photoFor = dive => photosForDive(dive)[0] || "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=500&q=80";
-    const diveKey = dive => String(dive.id || `${dive.place}|${dive.country}|${dive.date || ""}`);
-    const isOwnDive = dive => sharedMode ? dive.ownedByCurrentUser === true : dive.ownerId === localOwnerId || (!dive.ownerId && Boolean(profileName) && dive.diver === profileName);
-    function showToast(message) { const toast = document.getElementById("toast"); toast.textContent = message; toast.classList.add("show"); clearTimeout(showToast.timer); showToast.timer = setTimeout(() => toast.classList.remove("show"), 2600); }
-    function showPage(page) {
-      document.querySelectorAll(".page").forEach(section => section.classList.toggle("active", section.id === "page-" + page));
-      document.querySelectorAll(".nav button").forEach(button => button.classList.toggle("active", button.dataset.page === page));
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-    document.querySelectorAll("[data-page]").forEach(button => button.addEventListener("click", () => showPage(button.dataset.page)));
-    document.querySelectorAll("[data-go]").forEach(link => link.addEventListener("click", event => { event.preventDefault(); showPage(link.dataset.go); }));
-    function makeDiveCard(dive) {
-      const photos = photosForDive(dive);
-      const cardPhotos = photos.length ? photos.slice(0, 10) : [photoFor(dive)];
-      const gallery = cardPhotos.map((photo, index) => `<button class="dive-photo-button" type="button" data-dive-key="${escapeHtml(diveKey(dive))}" data-photo-index="${index}" aria-label="Enlarge dive photo ${index + 1} from ${escapeHtml(dive.place)}"><img class="dive-thumb" src="${escapeHtml(photo)}" alt="" loading="lazy"></button>`).join("");
-      const galleryClass = `dive-photo-grid${cardPhotos.length === 1 ? " single-photo" : ""}`;
-      const actions = isOwnDive(dive) ? `<div class="dive-log-actions"><button type="button" data-dive-action="edit" data-dive-id="${escapeHtml(diveKey(dive))}" aria-label="Edit ${escapeHtml(dive.place)} dive" title="Edit dive">✎</button><button type="button" data-dive-action="delete" data-dive-id="${escapeHtml(diveKey(dive))}" aria-label="Delete ${escapeHtml(dive.place)} dive" title="Delete dive">×</button></div>` : "";
-      return `<article class="dive-card"><div class="${galleryClass}">${gallery}</div><div class="dive-info"><h3>${escapeHtml(dive.flag || "🌊")} &nbsp;${escapeHtml(dive.place)}</h3><p>${escapeHtml(dive.country)} · ${escapeHtml(niceDate(dive.date))}${dive.depth ? ` · ${escapeHtml(dive.depth)}m` : ""}</p><p>Logged by ${escapeHtml(dive.diver || "Community diver")}</p>${actions}</div><div class="dive-highlight">${escapeHtml(dive.highlight || "A moment worth keeping")}</div></article>`;
-    }
-    function renderNudibranchGarden(diveCount) {
-      const colors = ["#ff886e", "#f6d36b", "#8fd8c2", "#b5a0e7", "#ffb0ca", "#6bc5dd"];
-      const slugs = Array.from({ length: Math.min(diveCount, 100) }, (_, index) => {
-        const column = index % 10;
-        const row = Math.floor(index / 10);
-        const x = 204 + column * 58 + (row % 2) * 7;
-        const y = 87 + row * 19;
-        const color = colors[index % colors.length];
-        const rotation = (index * 29) % 34 - 17;
-        return `<g transform="translate(${x} ${y}) rotate(${rotation})"><path d="M-10 2C-10-4-4-7 2-6 8-5 11-1 10 3 8 7 2 8-4 6-8 5-10 4-10 2Z" fill="${color}" stroke="#f2fbfd" stroke-width="1.1"/><path d="M-4-5Q-7-11-5-13M3-6Q5-12 9-12" fill="none" stroke="#f2fbfd" stroke-width="1.5" stroke-linecap="round"/><circle cx="-5" cy="-13" r="1.8" fill="#f2fbfd"/><circle cx="9" cy="-12" r="1.8" fill="#f2fbfd"/><circle cx="-3" cy="0" r="1.1" fill="#fff2c9"/><circle cx="3" cy="2" r="1.1" fill="#fff2c9"/></g>`;
-      }).join("");
-      const tracker = document.querySelector(".whale-tracker, .nudibranch-garden");
-      tracker.className = "nudibranch-garden";
-      tracker.innerHTML = `<svg viewBox="0 0 960 320" role="img" aria-labelledby="garden-title garden-description"><title id="garden-title">Coral garden: ${Math.min(diveCount, 100)} of 100 dives</title><desc id="garden-description">A blue underwater coral garden that gains one colorful nudibranch for every community dive logged.</desc><defs><linearGradient id="garden-water" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#0a3c60"/><stop offset="1" stop-color="#12617a"/></linearGradient><linearGradient id="garden-sand" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#276a78"/><stop offset="1" stop-color="#123f59"/></linearGradient></defs><rect width="960" height="320" fill="url(#garden-water)"/><path d="M0 279Q105 252 210 277T420 274T630 280T840 268T960 278V320H0Z" fill="url(#garden-sand)"/><g fill="none" stroke-linecap="round" stroke-width="8"><path d="M42 286v-63m0 30-22-19m22 35 22-26m0 44v-48m0 19-18-12" stroke="#ed806a"/><path d="M105 286v-82m0 31-24-22m24 42 26-31m-26 15-4-36" stroke="#f0c866"/><path d="M856 284v-67m0 27-22-19m22 39 24-28m0 48v-50m0 22-17-13" stroke="#e97e9b"/><path d="M914 286v-77m0 33-24-20m24 43 25-29m-25 15-2-39" stroke="#7fd5c0"/></g><g fill="#f6c970"><circle cx="158" cy="275" r="5"/><circle cx="176" cy="281" r="4"/><circle cx="788" cy="277" r="5"/><circle cx="807" cy="284" r="4"/></g><g id="nudibranchs">${slugs}</g><path d="M0 302Q160 286 320 302T640 299T960 302" fill="none" stroke="#67b2bc" stroke-opacity=".38" stroke-width="2"/></svg>`;
-      document.getElementById("whale-progress-label").textContent = `${Math.min(diveCount, 100)} of 100 dives logged`;
-    }
-    function renderDives() {
-      document.getElementById("recent-list").innerHTML = dives.slice(0, 4).map(makeDiveCard).join("") || '<div class="empty-state">Your first dive is waiting to be logged.</div>';
-      const loggedCountries = new Set(dives.map(dive => dive.country));
-      document.getElementById("stat-dives").textContent = String(dives.length).padStart(2, "0");
-      document.getElementById("stat-countries").textContent = String(loggedCountries.size).padStart(2, "0");
-      document.getElementById("stat-highlights").textContent = String(dives.filter(dive => dive.highlight).length).padStart(2, "0");
-      document.getElementById("challenge-count").textContent = Math.min(dives.length, 100);
-      document.getElementById("challenge-progress").style.width = Math.min(dives.length / 100 * 100, 100) + "%";
-      renderNudibranchGarden(dives.length);
-      renderDiveLogList();
-    }
-    function renderDiveLogList() {
-      const personFilter = document.getElementById("dive-person-filter");
-      const countryFilter = document.getElementById("dive-country-filter");
-      const selectedPerson = personFilter.value;
-      const selectedCountry = countryFilter.value;
-      const replaceOptions = (select, prompt, options, selected) => {
-        select.replaceChildren(new Option(prompt, ""), ...options.map(value => new Option(value, value)));
-        if (options.includes(selected)) select.value = selected;
-      };
-      const people = [...new Set(dives.map(dive => dive.diver).filter(Boolean))].sort();
-      const countries = [...new Set(dives.map(dive => dive.country).filter(Boolean))].sort();
-      replaceOptions(personFilter, "Everyone", people, selectedPerson);
-      replaceOptions(countryFilter, "Everywhere", countries, selectedCountry);
-      const siteQuery = document.getElementById("dive-site-filter").value.trim().toLowerCase();
-      const filtered = dives.filter(dive =>
-        (!personFilter.value || dive.diver === personFilter.value) &&
-        (!countryFilter.value || dive.country === countryFilter.value) &&
-        (!siteQuery || String(dive.place).toLowerCase().includes(siteQuery))
-      );
-      const list = document.getElementById("dive-log-list");
-      list.innerHTML = filtered.length ? filtered.map(dive => {
-        const photos = photosForDive(dive).slice(0, 10);
-        const gallery = photos.length ? `<div class="dive-photo-grid${photos.length === 1 ? " single-photo" : ""}">${photos.map((photo, index) => `<button class="dive-photo-button" type="button" data-dive-key="${escapeHtml(diveKey(dive))}" data-photo-index="${index}" aria-label="Enlarge dive photo ${index + 1} from ${escapeHtml(dive.place)}"><img class="dive-thumb" src="${escapeHtml(photo)}" alt="" loading="lazy"></button>`).join("")}</div>` : '<div class="dive-log-no-photo">No photo</div>';
-        const actions = isOwnDive(dive) ? `<div class="dive-log-actions"><button type="button" data-dive-action="edit" data-dive-id="${escapeHtml(diveKey(dive))}" aria-label="Edit ${escapeHtml(dive.place)} dive" title="Edit dive">✎</button><button type="button" data-dive-action="delete" data-dive-id="${escapeHtml(diveKey(dive))}" aria-label="Delete ${escapeHtml(dive.place)} dive" title="Delete dive">×</button></div>` : "";
-        return `<article class="dive-log-row">${gallery}<strong><span class="dive-site-marker" role="img" aria-label="Dive location"></span>${escapeHtml(dive.place)}</strong><span>${escapeHtml(dive.diver || "Community diver")} · ${escapeHtml(dive.country)}</span><span class="dive-log-date">${escapeHtml(niceDate(dive.date))}</span>${actions}</article>`;
-      }).join("") : `<div class="empty-state">${dives.length ? "No dives match these filters." : "No community dive entries yet."}</div>`;
-    }
-    document.getElementById("dive-person-filter").addEventListener("change", renderDiveLogList);
-    document.getElementById("dive-country-filter").addEventListener("change", renderDiveLogList);
-    document.getElementById("dive-site-filter").addEventListener("input", renderDiveLogList);
-    function openDialog(id) {
-      if (supabaseMode && !communitySignedIn && ["dive-dialog", "question-dialog", "sell-dialog", "profile-dialog"].includes(id)) {
-        showToast("Sign in before contributing to the community.");
-        document.getElementById("signin-dialog").showModal();
-        return;
-      }
-      document.getElementById(id).showModal();
-    }
-    let activeViewerPhotos = [];
-    let activeViewerAlt = "Dive photo";
-    let activeViewerIndex = 0;
-    function openPhotoViewer(photos, startIndex, altText) {
-      activeViewerPhotos = photos.filter(Boolean);
-      if (!activeViewerPhotos.length) return;
-      activeViewerAlt = altText;
-      activeViewerIndex = Math.max(0, Math.min(startIndex || 0, activeViewerPhotos.length - 1));
-      renderPhotoViewer();
-      openDialog("photo-dialog");
-    }
-    function renderPhotoViewer() {
-      document.getElementById("expanded-dive-photo").src = activeViewerPhotos[activeViewerIndex];
-      document.getElementById("expanded-dive-photo").alt = `${activeViewerAlt} ${activeViewerIndex + 1} of ${activeViewerPhotos.length}`;
-      document.getElementById("photo-viewer-position").textContent = `${activeViewerIndex + 1} / ${activeViewerPhotos.length}`;
-      document.getElementById("photo-viewer-previous").disabled = activeViewerIndex === 0;
-      document.getElementById("photo-viewer-next").disabled = activeViewerIndex === activeViewerPhotos.length - 1;
-    }
-    document.getElementById("photo-viewer-previous").addEventListener("click", () => { if (activeViewerIndex > 0) { activeViewerIndex--; renderPhotoViewer(); } });
-    document.getElementById("photo-viewer-next").addEventListener("click", () => { if (activeViewerIndex < activeViewerPhotos.length - 1) { activeViewerIndex++; renderPhotoViewer(); } });
-    function handleDivePhotoClick(event) {
-      const photoButton = event.target.closest(".dive-photo-button");
-      if (!photoButton) return;
-      const dive = dives.find(item => diveKey(item) === photoButton.dataset.diveKey);
-      if (!dive) return;
-      const photos = photosForDive(dive);
-      openPhotoViewer(photos.length ? photos : [photoFor(dive)], Number(photoButton.dataset.photoIndex), `Dive photo at ${dive.place}`);
-    }
-    document.getElementById("recent-list").addEventListener("click", handleDivePhotoClick);
-    document.getElementById("dive-log-list").addEventListener("click", handleDivePhotoClick);
-    document.querySelectorAll("[data-action]").forEach(button => button.addEventListener("click", () => {
-      const action = button.dataset.action;
-      if (action === "new-dive") prepareNewDive();
-      if (action === "ask-question") openDialog("question-dialog");
-      if (action === "sell-item") {
-        document.getElementById("gear-listing-as").textContent = profileName ? `Listing as ${profileName}` : "Listing as your dive profile";
-        openDialog("sell-dialog");
-      }
-    }));
-    document.querySelectorAll("[data-close]").forEach(button => button.addEventListener("click", () => button.closest("dialog").close()));
-    document.querySelectorAll("dialog").forEach(dialog => dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); }));
-    document.addEventListener("click", event => {
-      const button = event.target.closest("[data-dive-action]");
-      if (!button) return;
-      const dive = dives.find(item => diveKey(item) === button.dataset.diveId);
-      if (!dive || !isOwnDive(dive)) { showToast("You can only manage your own dive logs."); return; }
-      if (button.dataset.diveAction === "edit") { beginDiveEdit(dive); return; }
-      if (button.dataset.diveAction !== "delete" || !window.confirm(`Delete your dive at ${dive.place}?`)) return;
-      const finishDelete = () => {
-        const key = diveKey(dive);
-        dives = dives.filter(item => diveKey(item) !== key);
-        if (!sharedMode) persist("dive-atlas-dives", dives);
-        renderDives();
-        showToast("Dive log deleted.");
-      };
-      if (sharedMode) callBackend("deleteDive", dive.id, finishDelete);
-      else finishDelete();
-    });
-    function readImage(file, callback) {
-      if (!file) return;
-      if (!file.type.startsWith("image/")) { showToast("Choose an image file."); return; }
-      if (file.size > 20 * 1024 * 1024) { showToast("Choose a photo under 20 MB."); return; }
-      const saveAsDataUrl = imageFile => {
-        const reader = new FileReader();
-        reader.onload = () => callback(reader.result);
-        reader.onerror = () => showToast("Could not read this photo.");
-        reader.readAsDataURL(imageFile);
-      };
-      if (!supabaseMode && file.size <= 2 * 1024 * 1024) { saveAsDataUrl(file); return; }
-      createImageBitmap(file).then(bitmap => {
-        const maxDimension = 1600;
-        const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-        const context = canvas.getContext("2d");
-        if (!context) { bitmap.close(); showToast("Could not process this photo."); return; }
-        context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-        bitmap.close();
-        canvas.toBlob(blob => {
-          if (!blob) { showToast("Could not process this photo."); return; }
-          saveAsDataUrl(blob);
-        }, "image/jpeg", 0.82);
-      }).catch(() => showToast("Could not open this photo."));
-    }
-    function readPhotoBatch(files, maxCount, itemLabel, callback, maxDimension, quality) {
-      const selected = Array.from(files || []);
-      if (selected.length > maxCount) { showToast(`Choose up to ${maxCount} ${itemLabel} photos.`); return; }
-      if (selected.some(file => !file.type.startsWith("image/") || file.size > 20 * 1024 * 1024)) {
-        showToast(`Choose ${itemLabel} image files under 20 MB each.`);
-        return;
-      }
-      const images = [];
-      const compressNext = index => {
-        if (index >= selected.length) { callback(images); return; }
-        createImageBitmap(selected[index]).then(bitmap => new Promise((resolve, reject) => {
-          const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
-          const canvas = document.createElement("canvas");
-          canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-          canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-          const context = canvas.getContext("2d");
-          if (!context) { bitmap.close(); reject(new Error("Could not process photo.")); return; }
-          context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-          bitmap.close();
-          canvas.toBlob(blob => {
-            if (!blob) { reject(new Error("Could not process photo.")); return; }
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = () => reject(new Error("Could not read photo."));
-            reader.readAsDataURL(blob);
-          }, "image/jpeg", quality);
-        })).then(image => { images.push(image); compressNext(index + 1); }).catch(() => showToast(`Could not process one of the ${itemLabel} photos.`));
-      };
-      compressNext(0);
-    }
-    const divePhotoInput = document.getElementById("dive-photo");
-    divePhotoInput.multiple = true;
-    const divePhotoLabel = divePhotoInput.closest(".file-label");
-    divePhotoLabel.querySelectorAll("span")[1].textContent = "Choose up to 10 dive photos";
-    const divePhotoPreviews = document.createElement("div");
-    divePhotoPreviews.className = "photo-preview-grid";
-    divePhotoPreviews.id = "dive-photo-previews";
-    divePhotoLabel.parentElement.append(divePhotoPreviews);
-    let divePreviewUrls = [];
-    const diverField = document.createElement("div");
-    diverField.className = "field";
-    const diverLabel = document.createElement("label");
-    diverLabel.htmlFor = "dive-diver";
-    diverLabel.textContent = "Your name *";
-    const diverInput = document.createElement("input");
-    diverInput.id = "dive-diver";
-    diverInput.name = "diver";
-    diverInput.required = true;
-    diverInput.autocomplete = "name";
-    diverInput.placeholder = "Name shown with your dive";
-    diverInput.value = profileName;
-    diverField.append(diverLabel, diverInput);
-    const diveForm = document.getElementById("dive-form");
-    diveForm.prepend(diverField);
-    let editingDive = null;
-    const clearDivePhotoPreviews = () => {
-      divePreviewUrls.forEach(url => URL.revokeObjectURL(url));
-      divePreviewUrls = [];
-      divePhotoPreviews.replaceChildren();
-      divePhotoInput.value = "";
-    };
-    function prepareNewDive() {
-      editingDive = null;
-      diveForm.reset();
-      diverInput.value = profileName;
-      document.getElementById("dive-dialog-title").textContent = "Log a dive";
-      diveForm.querySelector('button[type="submit"]').textContent = "Save this dive";
-      document.getElementById("dive-photo-name").textContent = "Optional";
-      clearDivePhotoPreviews();
-      openDialog("dive-dialog");
-    }
-    function beginDiveEdit(dive) {
-      editingDive = dive;
-      document.getElementById("dive-place").value = dive.place || "";
-      document.getElementById("dive-country").value = dive.country || "";
-      document.getElementById("dive-date").value = dive.date || "";
-      document.getElementById("dive-depth").value = dive.depth || "";
-      document.getElementById("dive-highlight").value = dive.highlight || "";
-      diverInput.value = dive.diver || profileName;
-      clearDivePhotoPreviews();
-      const existingPhotoCount = photosForDive(dive).length;
-      document.getElementById("dive-photo-name").textContent = existingPhotoCount ? `${existingPhotoCount} saved; choose to replace` : "Optional";
-      document.getElementById("dive-dialog-title").textContent = "Edit your dive";
-      diveForm.querySelector('button[type="submit"]').textContent = "Save changes";
-      openDialog("dive-dialog");
-    }
-    divePhotoInput.addEventListener("change", () => {
-      const files = Array.from(divePhotoInput.files || []);
-      if (files.length > 10) {
-        divePhotoInput.value = "";
-        showToast("Choose up to 10 dive photos.");
-        return;
-      }
-      divePreviewUrls.forEach(url => URL.revokeObjectURL(url));
-      divePreviewUrls = [];
-      divePhotoPreviews.replaceChildren(...files.map((file, index) => {
-        const url = URL.createObjectURL(file);
-        divePreviewUrls.push(url);
-        const image = document.createElement("img");
-        image.src = url;
-        image.alt = `Selected dive photo ${index + 1}`;
-        return image;
-      }));
-      document.getElementById("dive-photo-name").textContent = files.length ? `${files.length} of 10 selected` : "Optional";
-    });
-    document.getElementById("dive-form").addEventListener("submit", event => {
-      event.preventDefault();
-      const form = event.currentTarget;
-      const data = new FormData(form);
-      const photoFiles = Array.from(divePhotoInput.files || []);
-      const saveDive = photos => {
-        const country = String(data.get("country")).trim();
-        const place = String(data.get("place")).trim();
-        const knownFlag = Object.entries(countryFlags).find(([name]) => name.toLowerCase() === country.toLowerCase())?.[1];
-        const editing = editingDive;
-        const retainedPhotos = photoFiles.length ? photos : (editing ? photosForDive(editing) : []);
-        const dive = { ...(editing || {}), ...(sharedMode ? {} : { id: editing?.id || createDiveId(), ownerId: editing?.ownerId || localOwnerId }), place, country, diver: String(data.get("diver")).trim(), flag: knownFlag || "🌊", date: data.get("date"), depth: data.get("depth"), highlight: String(data.get("highlight")).trim(), photos: retainedPhotos, photo: retainedPhotos[0] || "" };
-        const editingKey = editing ? diveKey(editing) : "";
-        const finishSave = savedDive => {
-          if (editingKey) {
-            const index = dives.findIndex(item => diveKey(item) === editingKey);
-            if (index >= 0) dives[index] = { ...savedDive, ownerId: savedDive.ownerId || editing?.ownerId || localOwnerId };
-            else dives.unshift(savedDive);
-          } else dives.unshift(savedDive);
-          if (!sharedMode) persist("dive-atlas-dives", dives);
-          renderDives();
-          form.closest("dialog").close(); form.reset(); editingDive = null; diverInput.value = profileName; document.getElementById("dive-photo-name").textContent = "Optional";
-          document.getElementById("dive-dialog-title").textContent = "Log a dive";
-          form.querySelector('button[type="submit"]').textContent = "Save this dive";
-          clearDivePhotoPreviews();
-          showToast(editingKey ? "Your dive log is updated." : "Dive added to the community log.");
-        };
-        if (sharedMode) {
-          const sharedDive = { ...dive, photos: photoFiles.length ? photos : [], replacePhotos: photoFiles.length > 0 };
-          if (callBackend("saveDive", sharedDive, finishSave)) return;
-        }
-        finishSave(dive);
-      };
-      if (photoFiles.length) { readPhotoBatch(photoFiles, 10, "dive", saveDive, 950, 0.68); return; }
-      saveDive([]);
-    });
-    const profileButton = document.getElementById("profile-button");
-    const authButton = document.getElementById("auth-button");
-    const profileForm = document.getElementById("profile-form");
-    const profileUsername = document.getElementById("profile-username");
-    const profilePhotoInput = document.getElementById("profile-photo-input");
-    profileButton.addEventListener("click", () => {
-      if (supabaseMode && !communitySignedIn) { showToast("Sign in before creating your profile."); return; }
-      profileUsername.value = profileName;
-      document.getElementById("profile-photo-name").textContent = "Optional";
-      openDialog("profile-dialog");
-    });
-    profilePhotoInput.addEventListener("change", () => { document.getElementById("profile-photo-name").textContent = profilePhotoInput.files[0]?.name || "Optional"; });
-    profileForm.addEventListener("submit", event => {
-      event.preventDefault();
-      const nextName = profileUsername.value.trim();
-      const saveProfile = image => {
-        const finishProfile = savedProfile => {
-          try {
-            if (!sharedMode) {
-              localStorage.setItem("dive-atlas-user", nextName);
-              if (image) localStorage.setItem("dive-atlas-profile", image);
-            }
-            profileName = savedProfile.username;
-            if (savedProfile.photo) profilePhoto = savedProfile.photo;
-            renderProfile();
-            diverInput.value = profileName;
-            profileForm.closest("dialog").close();
-            showToast(sharedMode ? "Your community profile is saved." : "Your profile is saved on this device.");
-          } catch { showToast("Storage is full. Try a smaller profile photo."); }
-        };
-        if (callBackend("saveProfile", { username: nextName, photo: image || "" }, finishProfile)) return;
-        finishProfile({ username: nextName, photo: image || profilePhoto });
-      };
-      const image = profilePhotoInput.files[0];
-      if (image) readImage(image, saveProfile); else saveProfile("");
-    });
-    function renderProfile() {
-      profileButton.innerHTML = profilePhoto ? `<img src="${profilePhoto}" alt="Your diver profile">` : (profileName.charAt(0).toUpperCase() || "A");
-      profileButton.setAttribute("aria-label", profileName ? `Edit profile for ${profileName}` : "Create your profile");
-      document.getElementById("profile-name-label").textContent = profileName || "Create profile";
-    }
-    function renderQuestions(filter = "All") {
-      const list = document.getElementById("question-list");
-      const filtered = questions.filter(question => filter === "All" || question.category === filter);
-      list.innerHTML = filtered.length ? filtered.map((question, index) => `<article class="question-card"><div class="question-meta">${escapeHtml(question.category)} · ${escapeHtml(question.author || "You")}</div><h3>${escapeHtml(question.title)}</h3><p>${escapeHtml(question.detail || "")}</p><div class="question-foot"><span>${Number(question.answers || 0)} answers</span><button class="vote" data-vote="${questions.indexOf(question)}">↑ &nbsp;${Number(question.votes || 0)} helpful</button></div></article>`).join("") : '<div class="empty-state">No questions in this topic yet. Start the conversation.</div>';
-      list.querySelectorAll("[data-vote]").forEach(button => button.addEventListener("click", () => {
-        const index = Number(button.dataset.vote);
-        const question = questions[index];
-        const applyVote = result => { question.votes = Number(result.votes); if (!sharedMode) persist("dive-atlas-questions", questions); renderQuestions(filter); };
-        if (callBackend("voteQuestion", question.id, applyVote)) return;
-        applyVote({ votes: Number(question.votes || 0) + 1 });
-      }));
-    }
-    document.querySelectorAll(".filter-chip").forEach(button => button.addEventListener("click", () => { document.querySelectorAll(".filter-chip").forEach(chip => chip.classList.remove("active")); button.classList.add("active"); renderQuestions(button.dataset.filter); }));
-    document.getElementById("question-form").addEventListener("submit", event => {
-      event.preventDefault(); const form = event.currentTarget; const data = new FormData(form);
-      const question = { category: String(data.get("category")), title: String(data.get("title")).trim(), detail: String(data.get("detail")).trim(), author: profileName || "You", answers: 0, votes: 0 };
-      const finishQuestion = savedQuestion => {
-        questions.unshift(savedQuestion);
-        if (!sharedMode) persist("dive-atlas-questions", questions);
-        form.closest("dialog").close(); form.reset();
-        document.querySelectorAll(".filter-chip").forEach(chip => chip.classList.toggle("active", chip.dataset.filter === "All"));
-        renderQuestions(); showPage("community"); showToast("Your question is live in the community.");
-      };
-      if (callBackend("saveQuestion", question, finishQuestion)) return;
-      finishQuestion(question);
-    });
-    document.querySelectorAll(".lesson-toggle").forEach(button => button.addEventListener("click", () => { const lesson = button.closest(".lesson"); lesson.classList.toggle("open"); button.querySelector(".lesson-arrow").textContent = lesson.classList.contains("open") ? "−" : "＋"; }));
-    const quizQuestions = [
-      { title: "Reef-side manners", question: "While hovering above a coral garden, what protects the reef?", answers: ["Hold trim and keep hands and fins clear.", "Rest a fin gently to steady myself.", "Pick up a small piece as a souvenir."], correct: 0, feedback: "Neutral buoyancy and distance protect the reef and you." },
-      { title: "Buddy check", question: "What belongs in a pre-dive buddy check?", answers: ["Agree on the plan and check equipment using your trained sequence.", "Assume the guide will handle every issue.", "Skip it if you have dived together before."], correct: 0, feedback: "Review the plan, limits, signals, equipment, and lost-buddy procedure together." },
-      { title: "Nitrox basics", question: "Before using an enriched-air cylinder, what should you do?", answers: ["Analyze and verify the mix, set your computer, and follow your training limits.", "Use the same settings as air.", "Choose depth by the label color alone."], correct: 0, feedback: "Verify the actual mix and plan within your certification and computer limits." },
-      { title: "Negative entry", question: "When is a negative entry appropriate?", answers: ["Only when trained, briefed, and planned for the conditions.", "Whenever the boat is moving.", "Whenever you want to catch up with the group."], correct: 0, feedback: "Entry style must match your training, buddy plan, sea state, and operator briefing." },
-      { title: "Current & drift", question: "A current is stronger than expected. What is the priority?", answers: ["Stay with your buddy and guide and follow the agreed plan.", "Swim hard against it alone.", "Leave the group to find a calmer route."], correct: 0, feedback: "Follow the briefing and pickup plan. End or skip the dive if conditions exceed your limits." },
-      { title: "Reef hooks", question: "What is the right reef-hook rule?", answers: ["Use one only if trained and the operator permits it; never hook living coral.", "Attach anywhere if the current is strong.", "Use one instead of practicing buoyancy."], correct: 0, feedback: "Follow the local briefing and conservation rules; a reef hook is not a substitute for control." },
-      { title: "Wreck diving", question: "What is required before entering a wreck?", answers: ["Specific overhead training, equipment, gas planning, and team procedures.", "A camera light and a buddy.", "A guide who says the opening looks wide enough."], correct: 0, feedback: "Stay outside overhead environments unless specifically trained and equipped for that dive." },
-      { title: "Cavern & cave", question: "Does a guided cavern dive qualify you to enter a cave zone?", answers: ["No. Stay within the cavern limits of your training and briefing.", "Yes, if the water looks clear.", "Yes, if you have a powerful torch."], correct: 0, feedback: "Cavern and cave diving have separate limits and training. Never pass the limits you are certified for." },
-      { title: "Night diving", question: "What helps a buddy team stay together at night?", answers: ["Agree on lights, signals, navigation, and separation procedures before entry.", "Turn off all lights to preserve night vision.", "Follow any light you see."], correct: 0, feedback: "Review light signals and navigation with your buddy and guide before the dive." },
-      { title: "Fluoro diving", question: "What is a good fluorescence-dive practice?", answers: ["Use the operator's lights and viewing filters; observe without touching wildlife.", "Shine lights into every crevice.", "Handle small animals to improve the photo."], correct: 0, feedback: "Use the correct equipment and protect the animals and habitat you came to see." },
-      { title: "Muck & macro", question: "How do you photograph tiny life on a muck dive?", answers: ["Move slowly, stay neutrally buoyant, and do not touch or rearrange the bottom.", "Kneel beside the subject.", "Move the animal into better light."], correct: 0, feedback: "Control your position and leave the habitat and animals undisturbed." },
-      { title: "Dry suit", question: "Before a cold-water dry-suit dive, what matters?", answers: ["Appropriate dry-suit training, thermal protection, and equipment checks.", "A thinner wetsuit underneath.", "A new suit with no practice."], correct: 0, feedback: "A dry suit changes buoyancy and thermal planning; train for the suit and conditions." },
-      { title: "Shark cage", question: "What should you know about many shark-cage experiences?", answers: ["They are usually surface cage activities, not scuba dives; follow the licensed operator.", "They count as wreck penetration.", "You should enter the water whenever a shark appears."], correct: 0, feedback: "Check local rules and operator safety and animal-welfare practices; follow their instructions." },
-      { title: "Deep & altitude", question: "How should you approach a deep or altitude dive?", answers: ["Stay within specific training, conservative limits, and local planning guidance.", "Use a longer bottom time to get your money's worth.", "Copy another diver's computer settings."], correct: 0, feedback: "Depth and altitude affect planning. Get appropriate training and follow your own computer and limits." },
-      { title: "Emergency refresh", question: "You feel rusty on an emergency skill. What is the best next step?", answers: ["Practice in a controlled setting with a qualified instructor before relying on it in open water.", "Try it for the first time on a deep dive.", "Wait until an emergency to remember it."], correct: 0, feedback: "Refresh skills with a qualified instructor in a controlled environment and within your training." }
-    ];
-    let quizIndex = 0;
-    function renderQuiz() {
-      const question = quizQuestions[quizIndex];
-      document.getElementById("quiz-progress").textContent = `${quizIndex + 1} / ${quizQuestions.length}`;
-      document.getElementById("quiz-title").textContent = question.title;
-      document.getElementById("quiz-question").textContent = question.question;
-      document.getElementById("quiz-feedback").textContent = "";
-      const options = document.getElementById("quiz-options");
-      options.innerHTML = question.answers.map((answer, index) => `<button type="button" data-quiz-answer="${index}">${escapeHtml(answer)}</button>`).join("");
-      options.querySelectorAll("[data-quiz-answer]").forEach(button => button.addEventListener("click", () => {
-        const correct = Number(button.dataset.quizAnswer) === question.correct;
-        document.getElementById("quiz-feedback").textContent = correct ? question.feedback : "Not quite. " + question.feedback;
-      }));
-    }
-    document.getElementById("quiz-previous").addEventListener("click", () => { quizIndex = (quizIndex - 1 + quizQuestions.length) % quizQuestions.length; renderQuiz(); });
-    document.getElementById("quiz-next").addEventListener("click", () => { quizIndex = (quizIndex + 1) % quizQuestions.length; renderQuiz(); });
-    renderQuiz();
-    function renderProducts() {
-      document.getElementById("shop-grid").innerHTML = products.length ? products.map((product, index) => {
-        const photos = Array.isArray(product.images) ? product.images : (product.image ? [product.image] : []);
-        const gallery = photos.length ? `<div class="product-photo-grid">${photos.slice(0, 5).map((photo, photoIndex) => `<button class="product-photo-button" type="button" data-photo-src="${escapeHtml(photo)}" data-photo-alt="${escapeHtml(product.name)} photo ${photoIndex + 1}" aria-label="Enlarge ${escapeHtml(product.name)} photo ${photoIndex + 1}"><img src="${escapeHtml(photo)}" alt="" loading="lazy"></button>`).join("")}</div>` : '<div class="product-placeholder"><span class="eyebrow">DIVE ATLAS FIND</span></div>';
-        const category = String(product.category || "Used · Community listing").replace(/^Pre-loved/, "Used");
-        const owner = product.owner || product.seller || "Community diver";
-        return `<article class="product"><div class="product-art">${gallery}</div><div class="product-info"><small>${escapeHtml(category)}</small><h3>${escapeHtml(product.name)}</h3><p>${escapeHtml(product.description || "A well-loved piece of kit, ready for another adventure.")}</p><p class="product-owner">Listed by ${escapeHtml(owner)}</p><div class="product-bottom"><span>CHF ${escapeHtml(product.price)}</span><button data-contact="${index}">Ask about it&nbsp; ↗</button></div></div></article>`;
-      }).join("") : '<div class="empty-state">No gear listings yet. Be the first to share a piece of dive kit.</div>';
-      document.getElementById("shop-grid").onclick = event => {
-        const photoButton = event.target.closest(".product-photo-button");
-        if (!photoButton) return;
-        openPhotoViewer([photoButton.dataset.photoSrc], 0, photoButton.dataset.photoAlt);
-      };
-      document.querySelectorAll("[data-contact]").forEach(button => button.addEventListener("click", () => showToast("Messaging will be available when the community is connected.")));
-    }
-    const productPhotoInput = document.getElementById("product-photos");
-    const productPhotoPreviews = document.getElementById("product-photo-previews");
-    const sellForm = document.getElementById("sell-form");
-    const gearListingAs = document.createElement("p");
-    gearListingAs.className = "profile-note";
-    gearListingAs.id = "gear-listing-as";
-    sellForm.prepend(gearListingAs);
-    document.querySelector('label[for="product-price"]').textContent = "Price (CHF) *";
-    const usedCondition = Array.from(document.querySelectorAll("#product-condition option")).find(option => option.value === "Pre-loved");
-    if (usedCondition) { usedCondition.value = "Used"; usedCondition.textContent = "Used"; }
-    let gearPreviewUrls = [];
-    productPhotoInput.addEventListener("change", () => {
-      const files = Array.from(productPhotoInput.files || []);
-      if (files.length > 5) {
-        productPhotoInput.value = "";
-        showToast("Choose up to 5 gear photos.");
-        return;
-      }
-      gearPreviewUrls.forEach(url => URL.revokeObjectURL(url));
-      gearPreviewUrls = [];
-      productPhotoPreviews.replaceChildren(...files.map((file, index) => {
-        const url = URL.createObjectURL(file);
-        gearPreviewUrls.push(url);
-        const image = document.createElement("img");
-        image.src = url;
-        image.alt = `Selected gear photo ${index + 1}`;
-        return image;
-      }));
-      document.getElementById("product-photo-count").textContent = files.length ? `${files.length} of 5 selected` : "Optional";
-    });
-    document.getElementById("sell-form").addEventListener("submit", event => {
-      event.preventDefault();
-      const form = event.currentTarget;
-      const data = new FormData(form);
-      const photoFiles = Array.from(productPhotoInput.files || []);
-      const finishListing = photos => {
-        const listing = { name: String(data.get("name")).trim(), owner: profileName || "You", price: String(data.get("price")), condition: String(data.get("condition")), category: `${data.get("condition")} · Community listing`, description: String(data.get("description")).trim(), images: photos, image: photos[0] || "" };
-        const saveListing = savedListing => {
-        products.unshift(savedListing);
-        if (!sharedMode) persist("dive-atlas-products", products);
-        renderProducts();
-        gearPreviewUrls.forEach(url => URL.revokeObjectURL(url)); gearPreviewUrls = [];
-        productPhotoPreviews.replaceChildren();
-        document.getElementById("product-photo-count").textContent = "Optional";
-        form.closest("dialog").close(); form.reset(); showPage("shop"); showToast("Your gear listing is live.");
-        };
-        if (callBackend("saveGearListing", listing, saveListing)) return;
-        saveListing(listing);
-      };
-      if (photoFiles.length) { readPhotoBatch(photoFiles, 5, "gear", finishListing, 1100, 0.74); return; }
-      finishListing([]);
-    });
-    renderDives(); renderProfile(); renderQuestions(); renderProducts();
-    if (workspaceMode) {
-      callBackend("getAppData", null, data => {
-        dives = Array.isArray(data.dives) ? data.dives : [];
-        questions = Array.isArray(data.questions) ? data.questions : [];
-        products = Array.isArray(data.products) ? data.products : [];
-        profileName = data.profile ? data.profile.username : "";
-        profilePhoto = data.profile ? data.profile.photo : "";
-        diverInput.value = profileName;
-        renderDives(); renderProfile(); renderQuestions(); renderProducts();
-      });
-    } else if (supabaseMode && window.DiveCompassSupabase) {
-      let communityUnsubscribers = [];
-      const profileNote = document.querySelector("#profile-dialog .profile-note");
-      profileNote.textContent = "Your profile and photo are shared with signed-in members of the dive community.";
-      const passwordButton = document.createElement("button");
-      passwordButton.type = "button";
-      passwordButton.className = "button outline";
-      passwordButton.textContent = "Set / change password";
-      passwordButton.addEventListener("click", () => {
-        profileForm.closest("dialog").close();
-        openDialog("password-dialog");
-      });
-      profileNote.after(passwordButton);
-      authButton.hidden = false;
-      authButton.addEventListener("click", () => {
-        if (!communitySignedIn) { openDialog("signin-dialog"); return; }
-        DiveCompassSupabase.signOut().catch(error => showToast(error.message || "Sign-out request failed."));
-      });
-      const signinForm = document.getElementById("signin-form");
-      const signinMode = document.getElementById("signin-mode");
-      const signinPassword = document.getElementById("signin-password");
-      const signupConfirm = document.getElementById("signup-confirm");
-      signinMode.addEventListener("change", () => {
-        const signup = signinMode.value === "signup";
-        signinPassword.autocomplete = signup ? "new-password" : "current-password";
-        signinPassword.minLength = signup ? 8 : 1;
-        document.getElementById("signup-confirm-field").hidden = !signup;
-        signupConfirm.disabled = !signup;
-        signupConfirm.required = signup;
-        signupConfirm.value = "";
-        signinForm.querySelector('button[type="submit"]').textContent = signup ? "Create account" : "Sign in";
-        document.getElementById("signin-status").textContent = "";
-      });
-      signinForm.addEventListener("submit", async event => {
-        event.preventDefault();
-        const signup = signinMode.value === "signup";
-        const button = signinForm.querySelector('button[type="submit"]');
-        const status = document.getElementById("signin-status");
-        if (signup && signinPassword.value !== signupConfirm.value) {
-          status.textContent = "Passwords do not match.";
-          return;
-        }
-        button.disabled = true;
-        signinMode.disabled = true;
-        status.textContent = signup ? "Creating your account..." : "Signing in...";
-        try {
-          const email = document.getElementById("signin-email").value.trim();
-          if (signup) await DiveCompassSupabase.signUp(email, signinPassword.value);
-          else await DiveCompassSupabase.signIn(email, signinPassword.value);
-          signinPassword.value = "";
-          signupConfirm.value = "";
-          status.textContent = "";
-          signinForm.closest("dialog").close();
-          showToast(signup ? "Account created. Use the avatar button to create your profile." : "You are signed in.");
-        } catch (error) {
-          status.textContent = error.message || "Could not sign in or create the account.";
-        } finally { button.disabled = false; signinMode.disabled = false; }
-      });
-      const passwordForm = document.getElementById("password-form");
-      passwordForm.addEventListener("submit", async event => {
-        event.preventDefault();
-        const status = document.getElementById("password-status");
-        const password = document.getElementById("new-password").value;
-        if (password !== document.getElementById("confirm-password").value) {
-          status.textContent = "Passwords do not match.";
-          return;
-        }
-        const button = passwordForm.querySelector('button[type="submit"]');
-        button.disabled = true;
-        status.textContent = "Saving password...";
-        try {
-          await DiveCompassSupabase.changePassword(password);
-          passwordForm.reset();
-          status.textContent = "";
-          passwordForm.closest("dialog").close();
-          showToast("Your password is updated.");
-        } catch (error) {
-          status.textContent = error.message || "Could not change your password.";
-        } finally { button.disabled = false; }
-      });
-      ["signin-dialog", "password-dialog"].forEach(id => {
-        const dialog = document.getElementById(id);
-        const passwords = Array.from(dialog.querySelectorAll('input[type="password"]'));
-        const label = document.createElement("label");
-        const toggle = document.createElement("input");
-        toggle.type = "checkbox";
-        toggle.setAttribute("aria-controls", passwords.map(input => input.id).join(" "));
-        label.append(toggle, " Show passwords");
-        dialog.querySelector(".form-actions").before(label);
-        toggle.addEventListener("change", () => {
-          passwords.forEach(input => { input.type = toggle.checked ? "text" : "password"; });
-        });
-        dialog.addEventListener("close", () => {
-          toggle.checked = false;
-          passwords.forEach(input => { input.type = "password"; input.value = ""; });
-        });
-      });
-      const applyCommunityData = data => {
-        dives = Array.isArray(data.dives) ? data.dives : [];
-        questions = Array.isArray(data.questions) ? data.questions : [];
-        products = Array.isArray(data.products) ? data.products : [];
-        profileName = data.profile ? data.profile.username : "";
-        profilePhoto = data.profile ? data.profile.photo : "";
-        diverInput.value = profileName;
-        renderDives(); renderProfile(); renderQuestions(); renderProducts();
-      };
-      DiveCompassSupabase.onAuthStateChanged((user, profile, error) => {
-        communityUnsubscribers.forEach(unsubscribe => unsubscribe());
-        communityUnsubscribers = [];
-        communitySignedIn = Boolean(user);
-        authButton.textContent = user ? "Sign out" : "Sign in";
-        authButton.setAttribute("aria-label", user ? "Sign out of the dive community" : "Sign in to the dive community");
-        if (error) showToast(error.message || "Could not load your profile.");
-        if (!user) {
-          passwordForm.closest("dialog").close();
-          applyCommunityData({ dives: [], questions: [], products: [], profile: null });
-          return;
-        }
-        profileName = profile ? profile.username : "";
-        profilePhoto = profile ? profile.photo : "";
-        renderProfile();
-        diverInput.value = profileName;
-        communityUnsubscribers = DiveCompassSupabase.subscribeAppData(applyCommunityData, requestError => showToast(requestError.message || "Could not load community updates."));
-      });
-    } else if (supabaseMode) showToast("Supabase did not load. Check your connection and reload.");
-  </script>
+  <script src="connected-journal.js"></script>
+  <script src="connected-account.js"></script>
 </body>
 </html>
