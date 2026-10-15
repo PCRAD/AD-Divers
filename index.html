@@ -191,6 +191,7 @@
     .modal-close { border: 0; background: transparent; color: var(--muted); font-size: 22px; padding: 0 3px; }
     .modal-form { padding: 19px 23px 23px; display: grid; gap: 13px; }
     .field { display: grid; gap: 6px; }
+    .field[hidden] { display: none; }
     .field label { font-size: 10px; font-weight: 700; color: #546d67; }
     .field input, .field textarea, .field select { border: 1px solid #dce5dd; background: #fbfcfa; padding: 11px; color: var(--ink); font-size: 12px; width: 100%; }
     .field textarea { min-height: 78px; resize: vertical; }
@@ -375,7 +376,8 @@
   <dialog id="profile-dialog"><div class="modal-head"><div><div class="eyebrow">Your dive identity</div><h2>Create your profile</h2></div><button class="modal-close" data-close aria-label="Close">×</button></div><form id="profile-form" class="modal-form"><div class="field"><label for="profile-username">Username *</label><input id="profile-username" name="username" required maxlength="32" autocomplete="username" placeholder="e.g. bluefins"></div><div class="field"><label class="file-label"><input id="profile-photo-input" type="file" accept="image/*"><span class="icon">↥</span><span>Choose a profile photo</span><span class="file-name" id="profile-photo-name">Optional</span></label></div><p class="profile-note">Prototype profile only: your name and photo stay in this browser. Secure sign-in and sharing between devices need a connected account service.</p><div class="form-actions"><button class="button outline" type="button" data-close>Cancel</button><button class="button" type="submit">Save profile</button></div></form></dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <dialog id="signin-dialog"><div class="modal-head"><div><div class="eyebrow">Join the dive community</div><h2>Sign in by email</h2></div><button class="modal-close" data-close aria-label="Close">×</button></div><form id="signin-form" class="modal-form"><div class="field"><label for="signin-email">Your email address</label><input id="signin-email" type="email" required autocomplete="email"></div><p>We will email you a sign-in link. Open it in this browser. New here? Following the link verifies your email and signs you in. No invitation or password is needed. Community logs and photos are shared with all signed-in members.</p><p id="signin-status" role="status"></p><div class="form-actions"><button class="button outline" type="button" data-close>Cancel</button><button class="button" type="submit">Email sign-in link</button></div></form></dialog>
+  <dialog id="signin-dialog"><div class="modal-head"><div><div class="eyebrow">Join the dive community</div><h2>Email and password</h2></div><button class="modal-close" data-close aria-label="Close">×</button></div><form id="signin-form" class="modal-form"><div class="field"><label for="signin-mode">Account action</label><select id="signin-mode"><option value="signin">Sign in</option><option value="signup">Create account</option></select></div><div class="field"><label for="signin-email">Your email address</label><input id="signin-email" type="email" required autocomplete="username"></div><div class="field"><label for="signin-password">Password</label><input id="signin-password" type="password" required autocomplete="current-password"></div><div id="signup-confirm-field" class="field" hidden><label for="signup-confirm">Confirm password</label><input id="signup-confirm" type="password" autocomplete="new-password" disabled></div><p>Anyone can create an account and access community logs and photos. Email addresses are not verified. Use your own address and a unique password of at least 8 characters, not your Gmail or work password.</p><p>Forgot your password? Contact the community administrator for identity verification and a manual reset. Automatic recovery emails are not configured.</p><p id="signin-status" role="status"></p><div class="form-actions"><button class="button outline" type="button" data-close>Cancel</button><button class="button" type="submit">Sign in</button></div></form></dialog>
+  <dialog id="password-dialog"><div class="modal-head"><h2>Set a new password</h2><button class="modal-close" data-close aria-label="Close">×</button></div><form id="password-form" class="modal-form"><p>This changes the password for your signed-in account. Existing email-link users can set their first password here.</p><div class="field"><label for="new-password">New password</label><input id="new-password" type="password" required minlength="8" autocomplete="new-password"></div><div class="field"><label for="confirm-password">Confirm new password</label><input id="confirm-password" type="password" required minlength="8" autocomplete="new-password"></div><p id="password-status" role="status"></p><div class="form-actions"><button class="button outline" type="button" data-close>Cancel</button><button class="button" type="submit">Save password</button></div></form></dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="supabase-backend.js"></script>
@@ -931,23 +933,86 @@
       let communityUnsubscribers = [];
       const profileNote = document.querySelector("#profile-dialog .profile-note");
       profileNote.textContent = "Your profile and photo are shared with signed-in members of the dive community.";
+      const passwordButton = document.createElement("button");
+      passwordButton.type = "button";
+      passwordButton.className = "button outline";
+      passwordButton.textContent = "Set / change password";
+      passwordButton.addEventListener("click", () => {
+        profileForm.closest("dialog").close();
+        openDialog("password-dialog");
+      });
+      profileNote.after(passwordButton);
       authButton.hidden = false;
       authButton.addEventListener("click", () => {
         if (!communitySignedIn) { openDialog("signin-dialog"); return; }
         DiveCompassSupabase.signOut().catch(error => showToast(error.message || "Sign-out request failed."));
       });
-      document.getElementById("signin-form").addEventListener("submit", async event => {
+      const signinForm = document.getElementById("signin-form");
+      const signinMode = document.getElementById("signin-mode");
+      const signinPassword = document.getElementById("signin-password");
+      const signupConfirm = document.getElementById("signup-confirm");
+      signinMode.addEventListener("change", () => {
+        const signup = signinMode.value === "signup";
+        signinPassword.autocomplete = signup ? "new-password" : "current-password";
+        signinPassword.minLength = signup ? 8 : 1;
+        document.getElementById("signup-confirm-field").hidden = !signup;
+        signupConfirm.disabled = !signup;
+        signupConfirm.required = signup;
+        signupConfirm.value = "";
+        signinForm.querySelector('button[type="submit"]').textContent = signup ? "Create account" : "Sign in";
+        document.getElementById("signin-status").textContent = "";
+      });
+      signinForm.addEventListener("submit", async event => {
         event.preventDefault();
-        const button = event.currentTarget.querySelector('button[type="submit"]');
+        const signup = signinMode.value === "signup";
+        const button = signinForm.querySelector('button[type="submit"]');
         const status = document.getElementById("signin-status");
+        if (signup && signinPassword.value !== signupConfirm.value) {
+          status.textContent = "Passwords do not match.";
+          return;
+        }
         button.disabled = true;
-        status.textContent = "Sending sign-in link...";
+        signinMode.disabled = true;
+        status.textContent = signup ? "Creating your account..." : "Signing in...";
         try {
-          await DiveCompassSupabase.signIn(document.getElementById("signin-email").value.trim());
-          status.textContent = "Check your inbox and spam folder for your sign-in link. Follow the link to finish signing in or joining the community.";
+          const email = document.getElementById("signin-email").value.trim();
+          if (signup) await DiveCompassSupabase.signUp(email, signinPassword.value);
+          else await DiveCompassSupabase.signIn(email, signinPassword.value);
+          signinPassword.value = "";
+          signupConfirm.value = "";
+          status.textContent = "";
+          signinForm.closest("dialog").close();
+          showToast(signup ? "Account created. Use the avatar button to create your profile." : "You are signed in.");
         } catch (error) {
-          status.textContent = error.message || "Could not send the sign-in link.";
+          status.textContent = error.message || "Could not sign in or create the account.";
+        } finally { button.disabled = false; signinMode.disabled = false; }
+      });
+      const passwordForm = document.getElementById("password-form");
+      passwordForm.addEventListener("submit", async event => {
+        event.preventDefault();
+        const status = document.getElementById("password-status");
+        const password = document.getElementById("new-password").value;
+        if (password !== document.getElementById("confirm-password").value) {
+          status.textContent = "Passwords do not match.";
+          return;
+        }
+        const button = passwordForm.querySelector('button[type="submit"]');
+        button.disabled = true;
+        status.textContent = "Saving password...";
+        try {
+          await DiveCompassSupabase.changePassword(password);
+          passwordForm.reset();
+          status.textContent = "";
+          passwordForm.closest("dialog").close();
+          showToast("Your password is updated.");
+        } catch (error) {
+          status.textContent = error.message || "Could not change your password.";
         } finally { button.disabled = false; }
+      });
+      ["signin-dialog", "password-dialog"].forEach(id => {
+        document.getElementById(id).addEventListener("close", () => {
+          document.querySelectorAll(`#${id} input[type="password"]`).forEach(input => { input.value = ""; });
+        });
       });
       const applyCommunityData = data => {
         dives = Array.isArray(data.dives) ? data.dives : [];
@@ -966,6 +1031,7 @@
         authButton.setAttribute("aria-label", user ? "Sign out of the dive community" : "Sign in to the dive community");
         if (error) showToast(error.message || "Could not load your profile.");
         if (!user) {
+          passwordForm.closest("dialog").close();
           applyCommunityData({ dives: [], questions: [], products: [], profile: null });
           return;
         }

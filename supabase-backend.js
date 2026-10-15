@@ -174,10 +174,16 @@
   window.DiveCompassSupabase = {
     enabled: true,
     call,
-    async signIn(email) {
-      await result(client.auth.signInWithOtp({
-        email, options: { shouldCreateUser: true, emailRedirectTo: config.redirectUrl }
-      }));
+    async signIn(email, password) {
+      await result(client.auth.signInWithPassword({ email, password }));
+    },
+    async signUp(email, password) {
+      const data = await result(client.auth.signUp({ email, password }));
+      if (!data.session) throw new Error("Registration did not start a session. Email confirmation may still be enabled; ask the administrator to check Supabase settings before retrying.");
+    },
+    async changePassword(password) {
+      await currentUser();
+      await result(client.auth.updateUser({ password }));
     },
     async signOut() { await result(client.auth.signOut()); },
     onAuthStateChanged(callback) {
