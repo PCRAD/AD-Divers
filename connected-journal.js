@@ -91,6 +91,9 @@
 
   function showStory(dive) {
     activeStoryId = dive.id;
+    const byline = dialog.querySelector(".editor-note");
+    byline.classList.add("member-byline");
+    byline.replaceChildren(createMemberAvatar(dive.diver, dive.authorPhoto), document.createTextNode(dive.diver || "Community member"));
     document.getElementById("story-title").textContent = dive.place;
     document.getElementById("story-copy").textContent =
       [dive.country, dive.diver, dive.date].filter(Boolean).join(" · ") + "\n\n" + (dive.highlight || "No story added yet.");
@@ -120,6 +123,9 @@
     heading.append(button);
     body.append(heading, text("p", (dive.highlight || "A dive worth remembering.").slice(0, 180)),
       text("div", [dive.diver, dive.date, `${(dive.photos || []).length} photos`].filter(Boolean).join(" · "), "meta"));
+    const byline = body.lastElementChild;
+    byline.classList.add("member-byline");
+    byline.prepend(createMemberAvatar(dive.diver, dive.authorPhoto));
     article.append(body);
     return article;
   }
@@ -158,6 +164,7 @@
     if (!data) {
       document.getElementById("story-title").textContent = "";
       document.getElementById("story-copy").textContent = "";
+      dialog.querySelector(".editor-note").textContent = "Member-submitted dive story.";
       activeStoryId = null;
     }
     const countries = new Map();
@@ -173,7 +180,7 @@
       const dive = records[index];
       activity.replaceChildren();
       activity.hidden = !dive;
-      if (dive) activity.append(text("span", (dive.diver || "?").charAt(0).toUpperCase(), "avatar"),
+      if (dive) activity.append(createMemberAvatar(dive.diver, dive.authorPhoto),
         text("p", `${dive.diver} logged ${dive.place}, ${dive.country}.`));
     });
     document.querySelector(".destination p").textContent = data ? `Explore our dives across ${countries.size} destinations.` : "Sign in to explore our community destinations.";

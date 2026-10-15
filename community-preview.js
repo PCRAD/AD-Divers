@@ -76,6 +76,9 @@
         element("h3", isGear ? item.name : item.title),
         element("p", isGear ? `${item.owner} · CHF ${Number(item.price).toFixed(2)}` : item.author),
         element("p", isGear ? item.description : item.detail));
+      const byline = card.children[2];
+      byline.classList.add("member-byline");
+      byline.prepend(createMemberAvatar(isGear ? item.owner : item.author, item.authorPhoto));
       if (isGear) {
         (item.images || []).forEach((url, index) => {
           const link = document.createElement("a");

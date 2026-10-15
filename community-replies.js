@@ -47,6 +47,8 @@ function createReplyThread(kind, parentId) {
         article.className = "sample-reply";
         const author = document.createElement("p");
         author.textContent = `${reply.author} · ${new Date(reply.created_at).toLocaleString()}`;
+        author.className = "member-byline";
+        author.prepend(createMemberAvatar(reply.author, reply.authorPhoto));
         const body = document.createElement("p");
         body.style.whiteSpace = "pre-wrap";
         body.textContent = reply.body;

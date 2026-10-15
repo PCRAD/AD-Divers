@@ -52,6 +52,8 @@
       title.textContent = dive.place;
       const meta = document.createElement("p");
       meta.textContent = [dive.country, dive.date, dive.diver, dive.depth == null ? "" : `${dive.depth} m`].filter(Boolean).join(" · ");
+      meta.className = "member-byline";
+      meta.prepend(createMemberAvatar(dive.diver, dive.authorPhoto));
       const body = document.createElement("p");
       body.textContent = dive.highlight || "";
       article.append(title, meta, body);

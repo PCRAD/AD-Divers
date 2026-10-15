@@ -37,6 +37,16 @@
     return profile ? { username: profile.username, photo: (await imageUrls(profile.photo_path ? [profile.photo_path] : []))[0] || "" } : null;
   }
 
+  async function memberProfiles(ids) {
+    const uniqueIds = [...new Set(ids)];
+    if (!uniqueIds.length) return new Map();
+    const profiles = await result(client.from("profiles").select("id, username, photo_path").in("id", uniqueIds));
+    const paths = [...new Set(profiles.map(profile => profile.photo_path).filter(Boolean))];
+    const urls = await imageUrls(paths);
+    const photos = new Map(paths.map((path, index) => [path, urls[index]]));
+    return new Map(profiles.map(profile => [profile.id, { username: profile.username, photo: photos.get(profile.photo_path) || "" }]));
+  }
+
   async function mapRow(table, row, user) {
     const base = { ...row, ownerUid: row.owner_id, ownedByCurrentUser: row.owner_id === user.id };
     if (table === "dives") {
@@ -58,11 +68,13 @@
       result(client.from("questions").select("*").order("created_at", { ascending: false })),
       result(client.from("gear").select("*").order("created_at", { ascending: false }))
     ]);
+    const members = await memberProfiles([...dives, ...questions, ...gear].map(row => row.owner_id));
+    const withAvatar = row => ({ ...row, authorPhoto: members.get(row.owner_id)?.photo || "" });
     return {
       profile: await mapProfile(profile),
-      dives: await Promise.all(dives.map(row => mapRow("dives", row, user))),
-      questions,
-      products: await Promise.all(gear.map(row => mapRow("gear", row, user)))
+      dives: await Promise.all(dives.map(row => mapRow("dives", withAvatar(row), user))),
+      questions: questions.map(withAvatar),
+      products: await Promise.all(gear.map(row => mapRow("gear", withAvatar(row), user)))
     };
   }
 
@@ -124,10 +136,8 @@
         const column = value.kind === "question" ? "question_id" : value.kind === "gear" ? "gear_id" : null;
         if (!column || !value.parentId) throw new Error("Choose a question or gear listing.");
         const rows = await result(client.from("community_replies").select("*").eq(column, value.parentId).order("created_at").order("id"));
-        const ids = [...new Set(rows.map(row => row.owner_id))];
-        const profiles = ids.length ? await result(client.from("profiles").select("id, username").in("id", ids)) : [];
-        const names = new Map(profiles.map(profile => [profile.id, profile.username]));
-        return rows.map(row => ({ ...row, author: names.get(row.owner_id) || "Former member", ownedByCurrentUser: row.owner_id === user.id }));
+        const members = await memberProfiles(rows.map(row => row.owner_id));
+        return rows.map(row => ({ ...row, author: members.get(row.owner_id)?.username || "Former member", authorPhoto: members.get(row.owner_id)?.photo || "", ownedByCurrentUser: row.owner_id === user.id }));
       }
       if (method === "deleteReply") {
         await result(client.from("community_replies").delete().eq("id", value.id).eq("owner_id", user.id).select("id").single());
