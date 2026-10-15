@@ -1010,8 +1010,20 @@
         } finally { button.disabled = false; }
       });
       ["signin-dialog", "password-dialog"].forEach(id => {
-        document.getElementById(id).addEventListener("close", () => {
-          document.querySelectorAll(`#${id} input[type="password"]`).forEach(input => { input.value = ""; });
+        const dialog = document.getElementById(id);
+        const passwords = Array.from(dialog.querySelectorAll('input[type="password"]'));
+        const label = document.createElement("label");
+        const toggle = document.createElement("input");
+        toggle.type = "checkbox";
+        toggle.setAttribute("aria-controls", passwords.map(input => input.id).join(" "));
+        label.append(toggle, " Show passwords");
+        dialog.querySelector(".form-actions").before(label);
+        toggle.addEventListener("change", () => {
+          passwords.forEach(input => { input.type = toggle.checked ? "text" : "password"; });
+        });
+        dialog.addEventListener("close", () => {
+          toggle.checked = false;
+          passwords.forEach(input => { input.type = "password"; input.value = ""; });
         });
       });
       const applyCommunityData = data => {
