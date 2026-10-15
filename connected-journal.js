@@ -107,12 +107,36 @@
     const article = document.createElement("article");
     article.className = homepage ? "card" : "destination-card";
     if (dive.photo) {
+      const photos = dive.photos && dive.photos.length ? dive.photos : [dive.photo];
+      let photoIndex = 0;
+      const gallery = document.createElement("div");
+      gallery.className = "card-gallery";
       const image = document.createElement("img");
-      image.src = dive.photo;
-      image.alt = `${dive.place} · Main dive photo`;
       image.loading = "lazy";
       if (!homepage) image.className = "live-dive-photo";
-      article.append(image);
+      gallery.append(image);
+      const counter = text("span", "", "card-photo-count");
+      counter.setAttribute("role", "status");
+      const displayPhoto = () => {
+        image.src = photos[photoIndex];
+        image.alt = `${dive.place} · Photo ${photoIndex + 1} of ${photos.length}`;
+        counter.textContent = `${photoIndex + 1} / ${photos.length}`;
+      };
+      if (photos.length > 1) {
+        [-1, 1].forEach(direction => {
+          const button = text("button", direction < 0 ? "‹" : "›", `card-photo-arrow ${direction < 0 ? "previous" : "next"}`);
+          button.type = "button";
+          button.setAttribute("aria-label", `${direction < 0 ? "Previous" : "Next"} photo of ${dive.place}`);
+          button.addEventListener("click", () => {
+            photoIndex = (photoIndex + direction + photos.length) % photos.length;
+            displayPhoto();
+          });
+          gallery.append(button);
+        });
+        gallery.append(counter);
+      }
+      displayPhoto();
+      article.append(gallery);
     }
     const body = document.createElement("div");
     body.className = "card-body";
