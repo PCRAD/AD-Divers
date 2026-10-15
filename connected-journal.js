@@ -246,7 +246,7 @@
     progress.textContent = data
       ? `${records.length} / 100 dives logged · ${records.length >= 100 ? "Goal reached!" : `${100 - records.length} to go!`}`
       : "Our goal: 100 community dives · Sign in to see our progress.";
-    garden.querySelector("p").textContent = "Our reef grows with every shared dive. Add yours and help us reach our community goal.";
+    garden.querySelector("p").textContent = "More dives. More nudis. Log yours and bring our reef to life.";
     filterDestinations();
     if (!data) document.getElementById("destination-count").textContent = "Sign in to view community destinations.";
   }
