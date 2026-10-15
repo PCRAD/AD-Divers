@@ -259,7 +259,10 @@
     .live-dive .account-actions { margin-top:16px; }
     .connected-form input[type="checkbox"] { width:auto; }
     .account-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
-    .account-avatar { width:35px; height:35px; border-radius:50%; object-fit:cover; }
+    #account-button { display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:6px 10px; background:transparent; }
+    #account-button:hover { background:#ffffff12; }
+    #account-button:focus-visible { outline:2px solid #b7d7c5; outline-offset:2px; }
+    .account-avatar { width:28px; height:28px; border-radius:50%; object-fit:cover; }
     .member-byline { display:flex; align-items:center; gap:9px; }
     .member-avatar { position:relative; display:inline-grid; place-items:center; flex-shrink:0; width:32px; height:32px; border-radius:50%; overflow:hidden; background:#c6d9c9; color:var(--navy); font-size:15px; }
     .member-avatar img { position:absolute; inset:0; width:100% !important; height:100% !important; min-height:0 !important; border-radius:50%; object-fit:cover; }
