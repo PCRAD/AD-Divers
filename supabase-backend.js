@@ -176,7 +176,7 @@
     call,
     async signIn(email) {
       await result(client.auth.signInWithOtp({
-        email, options: { shouldCreateUser: false, emailRedirectTo: config.redirectUrl }
+        email, options: { shouldCreateUser: true, emailRedirectTo: config.redirectUrl }
       }));
     },
     async signOut() { await result(client.auth.signOut()); },

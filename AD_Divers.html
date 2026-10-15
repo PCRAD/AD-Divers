@@ -319,7 +319,7 @@
           <a class="community-teaser" href="#refresher" data-go="refresher"><small>Quick refresher</small><p>Pre-dive checks, nitrox &amp; specialty dive ideas.</p></a>
           <a class="community-teaser" href="#shop" data-go="shop"><small>Good gear, good miles</small><p>Pass your well-loved kit on to another diver.</p></a>
         </div>
-        <div class="footer"><span>ONEAD DIVE COMPASS · MADE FOR THE MOMENTS BETWEEN DESCENTS</span><span>Community logs and photos are shared with signed-in colleagues only.</span></div>
+        <div class="footer"><span>ONEAD DIVE COMPASS · MADE FOR THE MOMENTS BETWEEN DESCENTS</span><span>Community logs and photos are shared with signed-in members. Anyone can join by email.</span></div>
       </section>
 
       <section class="page" id="page-divelog">
@@ -375,7 +375,7 @@
   <dialog id="profile-dialog"><div class="modal-head"><div><div class="eyebrow">Your dive identity</div><h2>Create your profile</h2></div><button class="modal-close" data-close aria-label="Close">×</button></div><form id="profile-form" class="modal-form"><div class="field"><label for="profile-username">Username *</label><input id="profile-username" name="username" required maxlength="32" autocomplete="username" placeholder="e.g. bluefins"></div><div class="field"><label class="file-label"><input id="profile-photo-input" type="file" accept="image/*"><span class="icon">↥</span><span>Choose a profile photo</span><span class="file-name" id="profile-photo-name">Optional</span></label></div><p class="profile-note">Prototype profile only: your name and photo stay in this browser. Secure sign-in and sharing between devices need a connected account service.</p><div class="form-actions"><button class="button outline" type="button" data-close>Cancel</button><button class="button" type="submit">Save profile</button></div></form></dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <dialog id="signin-dialog"><div class="modal-head"><div><div class="eyebrow">Invited colleagues only</div><h2>Sign in by email</h2></div><button class="modal-close" data-close aria-label="Close">×</button></div><form id="signin-form" class="modal-form"><div class="field"><label for="signin-email">Your invited email address</label><input id="signin-email" type="email" required autocomplete="email"></div><p>We will email you a sign-in link. Open it in this browser. New accounts must be invited by the community administrator.</p><p id="signin-status" role="status"></p><div class="form-actions"><button class="button outline" type="button" data-close>Cancel</button><button class="button" type="submit">Email sign-in link</button></div></form></dialog>
+  <dialog id="signin-dialog"><div class="modal-head"><div><div class="eyebrow">Join the dive community</div><h2>Sign in by email</h2></div><button class="modal-close" data-close aria-label="Close">×</button></div><form id="signin-form" class="modal-form"><div class="field"><label for="signin-email">Your email address</label><input id="signin-email" type="email" required autocomplete="email"></div><p>We will email you a sign-in link. Open it in this browser. New here? Following the link verifies your email and signs you in. No invitation or password is needed. Community logs and photos are shared with all signed-in members.</p><p id="signin-status" role="status"></p><div class="form-actions"><button class="button outline" type="button" data-close>Cancel</button><button class="button" type="submit">Email sign-in link</button></div></form></dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="supabase-backend.js"></script>
@@ -944,7 +944,7 @@
         status.textContent = "Sending sign-in link...";
         try {
           await DiveCompassSupabase.signIn(document.getElementById("signin-email").value.trim());
-          status.textContent = "If this address has been invited, a sign-in link will arrive shortly. Check your inbox and spam folder.";
+          status.textContent = "Check your inbox and spam folder for your sign-in link. Follow the link to finish signing in or joining the community.";
         } catch (error) {
           status.textContent = error.message || "Could not send the sign-in link.";
         } finally { button.disabled = false; }
