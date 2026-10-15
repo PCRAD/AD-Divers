@@ -104,6 +104,15 @@
         if (value.photo && existing && existing.photo_path) await removeImages([existing.photo_path]);
         return mapProfile(saved);
       }
+      if (method === "setDiveMainPhoto") {
+        const existing = await result(client.from("dives").select("*").eq("id", String(value.id)).eq("owner_id", user.id).single());
+        const index = existing.photo_paths.indexOf(value.photoPath);
+        if (index < 0) throw new Error("This photo is no longer part of the dive. Refresh and try again.");
+        const paths = [existing.photo_paths[index], ...existing.photo_paths.filter((_, position) => position !== index)];
+        const saved = await result(client.from("dives").update({ photo_paths: paths }).eq("id", existing.id).eq("owner_id", user.id).select().single());
+        committed = true;
+        return mapRow("dives", saved, user);
+      }
       if (method === "deleteDive") {
         const removed = await result(client.from("dives").delete().eq("id", String(payload)).eq("owner_id", user.id).select().single());
         committed = true;
@@ -111,7 +120,31 @@
         return true;
       }
       if (method === "voteQuestion") return result(client.rpc("vote_question", { question_id: String(payload) }));
+      if (method === "getReplies") {
+        const column = value.kind === "question" ? "question_id" : value.kind === "gear" ? "gear_id" : null;
+        if (!column || !value.parentId) throw new Error("Choose a question or gear listing.");
+        const rows = await result(client.from("community_replies").select("*").eq(column, value.parentId).order("created_at").order("id"));
+        const ids = [...new Set(rows.map(row => row.owner_id))];
+        const profiles = ids.length ? await result(client.from("profiles").select("id, username").in("id", ids)) : [];
+        const names = new Map(profiles.map(profile => [profile.id, profile.username]));
+        return rows.map(row => ({ ...row, author: names.get(row.owner_id) || "Former member", ownedByCurrentUser: row.owner_id === user.id }));
+      }
+      if (method === "deleteReply") {
+        await result(client.from("community_replies").delete().eq("id", value.id).eq("owner_id", user.id).select("id").single());
+        return true;
+      }
+      if (method === "updateReply") {
+        const body = clean(value.body, 2001);
+        if (!body || body.length > 2000) throw new Error("Enter a reply between 1 and 2000 characters.");
+        return result(client.from("community_replies").update({ body }).eq("id", value.id).eq("owner_id", user.id).select().single());
+      }
       const profile = await profileFor(user);
+      if (method === "saveReply") {
+        const column = value.kind === "question" ? "question_id" : value.kind === "gear" ? "gear_id" : null;
+        const body = clean(value.body, 2001);
+        if (!column || !value.parentId || !body || body.length > 2000) throw new Error("Choose a post and enter a reply between 1 and 2000 characters.");
+        return result(client.from("community_replies").insert({ owner_id: user.id, [column]: value.parentId, body }).select().single());
+      }
       if (method === "saveQuestion") {
         const title = clean(value.title, 200);
         if (!title) throw new Error("Add a question before posting.");
