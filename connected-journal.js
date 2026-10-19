@@ -48,21 +48,18 @@
   nextPage.addEventListener("click", () => { destinationPage++; filterDestinations(); document.getElementById("destination-title").focus(); });
   document.getElementById("destination-title").tabIndex = -1;
   let activeStoryId = null;
-  const countryPositions = {
-    egypt:[30,26], maldives:[73,4], indonesia:[118,-2], malta:[14.4,35.9],
-    thailand:[101,15], philippines:[122,12], malaysia:[110,4],
-    australia:[134,-25], mexico:[-102,24], belize:[-88,17],
-    palau:[134,7], fiji:[178,-18], japan:[138,37],
-    spain:[-4,40], portugal:[-8,39], italy:[12,43], france:[2,46],
-    croatia:[16,45], cyprus:[33,35], iceland:[-19,65], norway:[9,62],
-    "united kingdom":[-3,55], "south africa":[25,-29], mozambique:[35,-18],
-    tanzania:[35,-6], seychelles:[55,-5], mauritius:[57,-20],
-    ecuador:[-79,-2], "costa rica":[-84,10], honduras:[-87,15],
-    bonaire:[-68,12], curaçao:[-69,12], oman:[57,21],
-    "new zealand":[173,-41], "united states":[-100,39], usa:[-100,39],
-    sudan:[30,16], jordan:[36,31], "saudi arabia":[45,24]
-  };
   const countryKey = country => country.trim().toLocaleLowerCase("en");
+  const countryPositions = new Map(window.DiveCompassCountries.map(country => [countryKey(country.name), country]));
+  const countryAliases = {
+    usa: "United States", "united states of america": "United States",
+    uk: "United Kingdom", "cape verde": "Cabo Verde",
+    curacao: "Cura\u00e7ao", reunion: "R\u00e9union",
+    "czech republic": "Czechia", swaziland: "Eswatini",
+    "east timor": "Timor-Leste", "t\u00fcrkiye": "Turkey"
+  };
+  Object.entries(countryAliases).forEach(([alias, name]) => {
+    countryPositions.set(alias, countryPositions.get(countryKey(name)));
+  });
   const text = (tag, value, className) => {
     const element = document.createElement(tag);
     element.textContent = value;
@@ -82,7 +79,8 @@
   dialog.querySelector(".editor-note").textContent = "Member-submitted dive story.";
   document.getElementById("story-copy").style.whiteSpace = "pre-wrap";
   const oldNote = document.querySelector("#destinations > .editor-note");
-  oldNote.textContent = "Country flags indicate approximate country locations, not exact dive sites. Countries without a mapped position remain available in the filters.";
+  const mapNote = "Country flags indicate approximate country or territory locations, not exact dive sites. Small islands may be absent from the map background.";
+  oldNote.textContent = mapNote;
   const caption = document.querySelector(".map-caption");
   caption.lastChild.textContent = " public-domain boundaries. Small islands may be omitted. Flags show approximate country positions, not verified dive sites.";
   document.getElementById("atlas-description").textContent = "World map with selectable dive flags for mapped community countries. The country buttons offer all recorded destinations.";
@@ -210,14 +208,19 @@
     document.querySelector(".destination p").textContent = data ? `Explore our dives across ${countries.size} destinations.` : "Sign in to explore our community destinations.";
     countryTabs.replaceChildren();
     atlas.querySelectorAll('[data-country-marker],[data-live-country]').forEach(marker => marker.remove());
+    const unmappedCountries = [];
     [["", "All destinations"], ...[...countries].sort((a,b) => a[1].localeCompare(b[1]))].forEach(([key, label]) => {
       const button = text("button", label);
       button.dataset.liveCountry = key;
       button.addEventListener("click", () => { selectedCountry = key; destinationPage = 0; filterDestinations(); });
       countryTabs.append(button);
-      const position = countryPositions[key];
-      if (!position) return;
-      const [longitude, latitude] = position;
+      if (!key) return;
+      const position = countryPositions.get(key);
+      if (!position) {
+        unmappedCountries.push(label);
+        return;
+      }
+      const { longitude, latitude } = position;
       const x = (longitude + 180) / 360 * 960;
       const y = (90 - latitude) / 180 * 480;
       const marker = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -239,6 +242,9 @@
       });
       atlas.append(marker);
     });
+    oldNote.textContent = mapNote + (unmappedCountries.length
+      ? ` No map position found for: ${unmappedCountries.join(", ")}. These entries remain available in the country filters; edit their country to use the dropdown.`
+      : "");
     animals.replaceChildren(...animalTemplates.slice(0, Math.min(records.length, animalTemplates.length)).map(node => node.cloneNode(true)));
     garden.querySelector(".track span").style.width = `${Math.min(records.length, 100)}%`;
     const progress = garden.querySelector("small");
