@@ -253,6 +253,35 @@
     .connected-form textarea,.connected-form select { width:100%; padding:11px; font:inherit; }
     .connected-form textarea { min-height:100px; resize:vertical; }
     .dive-photo-preview { width:100%; max-height:180px; object-fit:contain; }
+    #dive-celebration-dialog { text-align:center; padding-top:56px; }
+    #garden-nudi-dialog { text-align:center; padding-top:56px; }
+    #garden-nudi-name { overflow-wrap:anywhere; font-style:italic; }
+    #garden-nudi-planter { justify-content:center; }
+    .nudi-collection { margin:32px 0; }
+    .nudi-collection h2 { margin:10px 0; }
+    .nudi-collection-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
+    .nudi-collection-card { display:flex; flex-direction:column; align-items:stretch; gap:10px; padding:18px; border:1px solid var(--line); background:white; color:var(--navy); text-align:left; cursor:pointer; font:inherit; min-width:0; }
+    .nudi-collection-card:hover { border-color:#528b83; }
+    .nudi-collection-card:focus-visible { outline:2px solid var(--navy); outline-offset:3px; }
+    .nudi-collection-card .celebration-nudi { margin:0; max-width:none; }
+    .nudi-collection-card strong { font:italic 23px Georgia,serif; overflow-wrap:anywhere; }
+    .nudi-collection-card span { font-size:13px; line-height:1.6; }
+    #garden-nudi-filter { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+    #garden-nudi-filter button { min-height:44px; border:1px solid #829e97; border-radius:20px; padding:8px 14px; background:transparent; color:#e6eee6; cursor:pointer; }
+    #garden-nudi-filter button[aria-pressed="true"] { background:#d6e7ce; color:var(--navy); }
+    #reef-nudibranchs .nudi-dimmed { opacity:.2; }
+    #reef-nudibranchs .nudi-mine use { filter:drop-shadow(0 0 4px #fff1c9); }
+    @media(max-width:700px) { .nudi-collection-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media(max-width:420px) { .nudi-collection-grid { grid-template-columns:1fr; } }
+    #reef-nudibranchs [role="button"] { cursor:pointer; }
+    #reef-nudibranchs [role="button"]:hover use,
+    #reef-nudibranchs [role="button"]:focus-visible use { filter:drop-shadow(0 0 5px #fff1c9); }
+    #reef-nudibranchs [role="button"]:focus-visible .nudi-hit-area { stroke:#fff1c9; stroke-width:2; }
+    .celebration-close { position:absolute; top:8px; right:8px; width:44px; height:44px; border:0; border-radius:50%; background:transparent; color:var(--navy); font:28px "Segoe UI",sans-serif; cursor:pointer; }
+    .celebration-close:hover { background:#dce8df; }
+    .celebration-close:focus-visible { outline:2px solid var(--navy); outline-offset:2px; }
+    .celebration-nudi { display:block; width:100%; max-width:300px; height:auto; margin:0 auto 18px; border-radius:12px; background:#174b57; }
+    #dive-celebration-progress { font-weight:700; color:var(--navy); }
     .selected-photo-row { display:flex; align-items:center; gap:12px; margin:10px 0; font-size:12px; }
     .selected-photo-row span { flex:1; overflow-wrap:anywhere; min-width:0; }
     .selected-photo-row img { width:60px; height:50px; object-fit:cover; border-radius:4px; }
@@ -278,6 +307,8 @@
     .dive-gallery-controls { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0; }
     .dive-gallery-controls button { border:1px solid #b8cec4; background:#eaf0e7; color:var(--navy); padding:8px 14px; border-radius:4px; }
     .dive-gallery-controls span { font-size:12px; }
+    #story-gallery img { display:block; width:100%; max-height:340px; object-fit:contain; border-radius:4px; background:#123c47; }
+    #story-gallery .dive-gallery-controls button { min-width:44px; min-height:44px; font-size:23px; }
     #live-dives { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:20px; }
     .live-dive { padding:22px; background:white; border:1px solid var(--line); overflow-wrap:anywhere; }
     .live-dive p { line-height:1.7; font-size:14px; white-space:pre-wrap; }
@@ -304,7 +335,16 @@
     <section id="logbook" hidden>
       <div class="explorer-heading"><div class="eyebrow">Your community / Connected logbook</div><h1>Stories from below.</h1></div>
       <button id="log-dive-button" data-log-dive class="button">＋ Log a dive</button>
+      <section class="nudi-collection" aria-labelledby="nudi-collection-heading">
+        <div class="eyebrow">My nudi collection</div>
+        <h2 id="nudi-collection-heading" tabindex="-1">Little creatures. Big memories.</h2>
+        <p id="nudi-collection-status" role="status">Sign in to discover your planted nudis.</p>
+        <div id="nudi-collection-grid" class="nudi-collection-grid"></div>
+        <nav id="nudi-collection-pagination" class="community-pagination" aria-label="My nudi collection pages" hidden><button class="button" type="button" data-direction="-1">Previous</button><span role="status"></span><button class="button" type="button" data-direction="1">Next</button></nav>
+      </section>
+      <h2 id="logbook-dives-heading" tabindex="-1">Community dive logs</h2>
       <p id="logbook-status" role="status"></p><div id="live-dives"></div>
+      <nav id="logbook-pagination" class="community-pagination" aria-label="Dive log pages" hidden><button class="button" type="button" data-direction="-1">Previous</button><span role="status"></span><button class="button" type="button" data-direction="1">Next</button></nav>
     </section>
     <section id="home">
       <div class="edition"><span>Take only pictures, leave only bubbles</span><span>Vol. 01 — Community edition</span></div>
@@ -325,9 +365,12 @@
       <div class="split">
         <div class="destination"><div class="eyebrow">Our blue planet</div><h2>Different oceans.<br>Shared adventures.</h2><p>Explore sample field notes from Indonesia, Maldives, and Egypt.</p><button class="text-button" data-demo="Map concept only. A live map would need verified location data.">Explore destinations →</button><img class="map" src="world-map.svg" alt="" aria-hidden="true"></div>
         <div class="garden"><div class="eyebrow">Our community coral garden</div><h2>Let's reach<span class="garden-goal">100 dives together.</span></h2><p>More dives. More nudis. Log yours and bring our reef to life.</p>
-          <svg class="reef-scene" viewBox="0 0 620 310" role="img" aria-labelledby="reef-title reef-desc">
+          <div id="garden-nudi-filter" role="group" aria-label="Highlight garden nudis"><button type="button" data-nudi-filter="all" aria-pressed="true">All nudis</button><button type="button" data-nudi-filter="mine" aria-pressed="false" disabled>My nudis · 0</button></div>
+          <p id="garden-mine-status" role="status" hidden></p>
+          <button id="open-nudi-collection" class="text-button" type="button">Explore my nudi collection →</button>
+          <svg class="reef-scene" viewBox="0 0 620 310" role="group" aria-labelledby="reef-title reef-desc">
             <title id="reef-title">An illustrated nudibranch reef garden</title>
-            <desc id="reef-desc">Thirty-eight small sea slugs with rippled mantles, paired rhinophores, spots, and feathery gills among branching corals and rocks. An artistic sample milestone, not a species-identification diagram.</desc>
+            <desc id="reef-desc">Space for 100 small sea slugs with rippled mantles, paired rhinophores, spots, and feathery gills among branching corals and rocks. Artistic illustrations, not a species-identification diagram.</desc>
             <defs>
               <linearGradient id="reef-water" x2="0" y2="1"><stop stop-color="#0d3b50"/><stop offset="1" stop-color="#1c6069"/></linearGradient>
               <linearGradient id="reef-floor" x2="0" y2="1"><stop stop-color="#486d66"/><stop offset=".6" stop-color="#829184"/><stop offset="1" stop-color="#b2aa8b"/></linearGradient>
@@ -335,36 +378,55 @@
               <pattern id="sand-grain" width="31" height="23" patternUnits="userSpaceOnUse"><circle cx="4" cy="5" r=".7" fill="#f0dec0" opacity=".4"/><circle cx="21" cy="17" r="1" fill="#183e43" opacity=".3"/><path d="m8 18 5-1m10-11 3 1" stroke="#cfccb0" stroke-width=".6" opacity=".5"/></pattern>
               <pattern id="coral-polyps" width="11" height="9" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="2.3" fill="none" stroke="#ecc5a7" stroke-width=".8"/><circle cx="4" cy="4" r=".8" fill="#664e56"/></pattern>
               <g id="striped-slug">
-                <path d="M-29 5Q-24-3-22-10Q-17-16-10-12Q-1-17 9-11Q20-12 25-5L33 5Q24 10 18 12Q8 17-1 12Q-13 17-20 10Z" fill="#eef4da" stroke="#e3a32b" stroke-width="2.5"/>
-                <path d="M-21-5Q0-10 20 1M-24 2Q-1-3 24 6M-17 8Q1 3 17 10" fill="none" stroke="#223550" stroke-width="2.6"/>
-                <path d="m-18-7-3-11m10 10 1-13" stroke="#e5a038" stroke-width="3.5" stroke-linecap="round"/>
-                <path d="m12 1-4-10m4 10 2-12m-2 12 8-8m-8 8 10-1" fill="none" stroke="#d99029" stroke-width="2"/>
+                <path d="M-29 5Q-24-3-22-10Q-17-16-10-12Q-1-17 9-11Q20-12 25-5L33 5Q24 10 18 12Q8 17-1 12Q-13 17-20 10Z" fill="currentColor" stroke="var(--nudi-edge)" stroke-width="2.5"/>
+                <path d="M-21-5Q0-10 20 1M-24 2Q-1-3 24 6M-17 8Q1 3 17 10" fill="none" stroke="var(--nudi-pattern)" stroke-width="2.6"/>
+                <path d="m-18-7-3-11m10 10 1-13" stroke="var(--nudi-accent)" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="m12 1-4-10m4 10 2-12m-2 12 8-8m-8 8 10-1" fill="none" stroke="var(--nudi-accent)" stroke-width="2"/>
               </g>
               <g id="aeolid-slug">
-                <path d="M-27 3Q-11-6 13-2L34 5 13 9Q-10 13-27 3Z" fill="#b6d6e6" stroke="#e0f5ed" stroke-width="1"/>
-                <g fill="currentColor" stroke="#f2d6cf" stroke-width=".8">
+                <path d="M-27 3Q-11-6 13-2L34 5 13 9Q-10 13-27 3Z" fill="currentColor" stroke="var(--nudi-edge)" stroke-width="1"/>
+                <g fill="var(--nudi-cerata)" stroke="var(--nudi-edge)" stroke-width=".8">
                   <path d="M-17 3Q-32-19-21-20Q-14-15-13 2ZM-9 1Q-22-25-12-25Q-6-18-5 1ZM0 1Q-9-27 1-25Q7-17 5 2ZM9 2Q8-20 16-18Q21-12 14 4ZM17 5Q21-11 26-6Q28 0 21 6Z"/>
                   <path d="M-17 5Q-29 23-20 23Q-12 19-13 6ZM-8 6Q-18 29-9 27Q-2 21-4 6ZM1 7Q-3 29 5 25Q12 19 7 7ZM11 7Q14 26 20 20Q23 15 16 7Z"/>
                 </g>
-                <path d="m-23 1-12-8m13 10-13 8m13-10-1-15m5 14 4-16" fill="none" stroke="#f3d8c6" stroke-width="2" stroke-linecap="round"/>
+                <path d="m-23 1-12-8m13 10-13 8m13-10-1-15m5 14 4-16" fill="none" stroke="var(--nudi-accent)" stroke-width="2" stroke-linecap="round"/>
+                <g fill="var(--nudi-accent)"><circle cx="-22" cy="-19" r="2"/><circle cx="-13" cy="-24" r="2"/><circle cx="0" cy="-24" r="2"/><circle cx="16" cy="-17" r="2"/><circle cx="-20" cy="22" r="2"/><circle cx="-9" cy="25" r="2"/><circle cx="5" cy="24" r="2"/><circle cx="20" cy="19" r="2"/></g>
               </g>
               <g id="spotted-slug">
-                <path d="M-26 3Q-26-11-12-14Q0-21 13-12Q27-10 28 2Q25 17 11 14Q-2 21-15 13Q-25 14-26 3Z" fill="#f0d87e" stroke="#f8f0ba" stroke-width="2"/>
-                <g fill="#202c44"><circle cx="-17" cy="0" r="3"/><circle cx="-9" cy="-8" r="2.8"/><circle cx="-7" cy="7" r="3"/><circle cx="1" cy="-3" r="2.6"/><circle cx="5" cy="10" r="2"/><circle cx="17" cy="-5" r="2.7"/><circle cx="21" cy="6" r="2.4"/></g>
-                <path d="m-18-8-2-12m10 10 1-12" stroke="#39324a" stroke-width="3" stroke-linecap="round"/>
-                <path d="M12 5 6-8m6 13 2-16m-2 16 9-11m-9 11 13-3m-13 3 8 7" stroke="#f7edc1" stroke-width="2" fill="none"/>
+                <path d="M-26 3Q-26-11-12-14Q0-21 13-12Q27-10 28 2Q25 17 11 14Q-2 21-15 13Q-25 14-26 3Z" fill="currentColor" stroke="var(--nudi-edge)" stroke-width="2"/>
+                <g fill="var(--nudi-pattern)"><circle cx="-17" cy="0" r="3"/><circle cx="-9" cy="-8" r="2.8"/><circle cx="-7" cy="7" r="3"/><circle cx="1" cy="-3" r="2.6"/><circle cx="5" cy="10" r="2"/><circle cx="17" cy="-5" r="2.7"/><circle cx="21" cy="6" r="2.4"/></g>
+                <path d="m-18-8-2-12m10 10 1-12" stroke="var(--nudi-accent)" stroke-width="3" stroke-linecap="round"/>
+                <path d="M12 5 6-8m6 13 2-16m-2 16 9-11m-9 11 13-3m-13 3 8 7" stroke="var(--nudi-accent)" stroke-width="2" fill="none"/>
               </g>
               <radialGradient id="reef-light"><stop stop-color="#a7dcd1" stop-opacity=".16"/><stop offset="1" stop-color="#a7dcd1" stop-opacity="0"/></radialGradient>
               <g id="sea-slug">
-                <path d="M-23 3Q-21-3-16-5Q-18-10-12-12Q-9-17-3-14Q3-19 9-14Q18-15 20-9Q28-7 25-1Q30 5 23 8Q23 14 16 13Q10 18 4 14Q-3 18-9 14Q-17 17-19 10Q-27 9-23 3Z" fill="currentColor" stroke="#f7e9d4" stroke-width="1.5"/>
+                <path d="M-23 3Q-21-3-16-5Q-18-10-12-12Q-9-17-3-14Q3-19 9-14Q18-15 20-9Q28-7 25-1Q30 5 23 8Q23 14 16 13Q10 18 4 14Q-3 18-9 14Q-17 17-19 10Q-27 9-23 3Z" fill="currentColor" stroke="var(--nudi-edge)" stroke-width="1.5"/>
                 <path d="M-18 3Q-9-12 7-10Q22-8 20 3Q11 13-4 10Q-16 10-18 3Z" fill="#ffffff25"/>
-                <path d="M-13-5l-3-10m10 7 1-12" stroke="#f9ecd8" stroke-width="2.8" stroke-linecap="round"/>
+                <path d="M-13-5l-3-10m10 7 1-12" stroke="var(--nudi-accent)" stroke-width="2.8" stroke-linecap="round"/>
                 <path d="m-17-16 3 1m-2-4 2 1m7-3 4 1m-4 3 4 1" stroke="#eeb254" stroke-width="2" stroke-linecap="round"/>
-                <g stroke="#fff5df" stroke-width="1.3" fill="none" stroke-linecap="round">
+                <g stroke="var(--nudi-accent)" stroke-width="1.3" fill="none" stroke-linecap="round">
                   <path d="M10 4V-8M10 0 4-5M10 0l7-6M10-3 6-9M10-3l4-7M10 3 3 0m7 3 8-3"/>
                   <path d="m5-4-3 1m3-1v-3m10 2 4 1m-4-1 1-3"/>
                 </g>
-                <g fill="#243a62"><ellipse cx="-9" cy="1" rx="2.2" ry="1.5"/><circle cx="-2" cy="-5" r="1.5"/><circle cx="0" cy="5" r="1.7"/><circle cx="17" cy="6" r="1.3"/><circle cx="-12" cy="7" r="1.2"/></g>
+                <g fill="var(--nudi-pattern)"><ellipse cx="-9" cy="1" rx="2.2" ry="1.5"/><circle cx="-2" cy="-5" r="1.5"/><circle cx="0" cy="5" r="1.7"/><circle cx="17" cy="6" r="1.3"/><circle cx="-12" cy="7" r="1.2"/></g>
+              </g>
+              <g id="tubercle-slug">
+                <path d="M-28 2Q-31-12-17-14L-10-17Q-5-22 1-17Q9-21 15-14Q31-13 28 2Q32 12 17 15Q6 21-3 16Q-18 20-25 10Z" fill="currentColor" stroke="var(--nudi-edge)" stroke-width="2"/>
+                <g fill="var(--nudi-pattern)" stroke="var(--nudi-accent)" stroke-width="1.2">
+                  <ellipse cx="-18" cy="-5" rx="4" ry="3"/><ellipse cx="-9" cy="-10" rx="4" ry="3"/><ellipse cx="1" cy="-11" rx="4" ry="3"/><ellipse cx="11" cy="-8" rx="4" ry="3"/><ellipse cx="21" cy="-3" rx="4" ry="3"/>
+                  <ellipse cx="-20" cy="4" rx="4" ry="3"/><ellipse cx="-10" cy="0" rx="4" ry="3"/><ellipse cx="0" cy="-2" rx="4" ry="3"/><ellipse cx="10" cy="1" rx="4" ry="3"/><ellipse cx="20" cy="7" rx="4" ry="3"/>
+                  <ellipse cx="-12" cy="10" rx="4" ry="3"/><ellipse cx="-2" cy="9" rx="4" ry="3"/><ellipse cx="8" cy="11" rx="4" ry="3"/>
+                </g>
+                <path d="m-21-10-1-10m9 8 1-12" stroke="var(--nudi-accent)" stroke-width="3" stroke-linecap="round"/>
+                <path d="m15 4-5-10m5 10 1-11m-1 11 7-8m-7 8 10-1" fill="none" stroke="var(--nudi-edge)" stroke-width="2"/>
+              </g>
+              <g id="ribbon-slug">
+                <path d="M-29 4Q-21-5-13-5L14-3 35 6 12 9-12 9Z" fill="currentColor" stroke="var(--nudi-edge)" stroke-width="1.2"/>
+                <g fill="var(--nudi-cerata)" stroke="var(--nudi-accent)" stroke-width="1.5" stroke-linejoin="round">
+                  <path d="m-17 2-11-20 15 17-7-23 13 22-1-25 8 25 7-23-1 25 17-17-10 21Z"/>
+                  <path d="m-17 6-10 17 15-14-6 18L-5 9l2 18L3 9l9 15-4-17 17 11-12-13Z"/>
+                </g>
+                <path d="m-25 1-11-9m12 12-10 8m11-12-2-16m7 15 3-17" stroke="var(--nudi-accent)" stroke-width="2" fill="none" stroke-linecap="round"/>
               </g>
             </defs>
             <rect width="620" height="310" fill="url(#reef-water)"/>
@@ -376,20 +438,22 @@
             <path d="M0 252Q90 212 177 243T354 230T510 235T620 219V310H0Z" fill="url(#sand-grain)"/>
             <g fill="url(#reef-rock)" stroke="#7c9683" stroke-width=".7"><path d="M85 230q-16-48 18-70 34-17 69 12l20 65Z"/><path d="M241 262q-25-55 15-86 51-27 77 12l20 66Z"/><path d="M397 239q-5-49 31-67 31-9 59 21l-1 43Z"/></g>
             <g fill="none" stroke="#bdc3a3" opacity=".25"><path d="m106 181 20-7 26 16m-52 16 32-9 33 14m96-11 27-12 25 21m-48 19 31-7 24 14m104-45 28 8-9 20"/></g>
-            <g id="reef-fans"></g>
-            <g fill="#9f8b7e" stroke="#c9ad8a" stroke-width="1.2"><path d="M0 297q-8-40 23-55 37-17 62 5 28 28 13 50Z"/><path d="M442 310q-7-35 13-48 27-21 55-3 25 18 23 51Z"/></g>
-            <g fill="url(#coral-polyps)" opacity=".8"><path d="M0 297q-8-40 23-55 37-17 62 5 28 28 13 50Z"/><path d="M442 310q-7-35 13-48 27-21 55-3 25 18 23 51Z"/></g>
+            <g id="reef-fans" opacity=".3"></g>
+            <g fill="#907e70" stroke="#cfbca3" stroke-width="1.8"><path d="M0 297q-8-40 23-55 37-17 62 5 28 28 13 50Z"/><path d="M442 310q-7-35 13-48 27-21 55-3 25 18 23 51Z"/></g>
+            <g fill="url(#coral-polyps)" opacity=".2"><path d="M0 297q-8-40 23-55 37-17 62 5 28 28 13 50Z"/><path d="M442 310q-7-35 13-48 27-21 55-3 25 18 23 51Z"/></g>
             <g fill="#42686a" stroke="#6c8d83" stroke-width="1"><path d="M78 274q5-40 48-42t62 34z"/><path d="M345 282q-7-47 40-57t76 49z"/><path d="M461 231q5-25 38-27t39 30z"/></g>
-            <g fill="none" stroke-linecap="round">
-              <g stroke="#cb8f83" stroke-width="7"><path d="M42 275v-82m0 36-21-24m21 43 25-25m-25-14 14-26M21 205v-20m46 38 9-19"/></g>
-              <g stroke="#e1b48a" stroke-width="5"><path d="M82 282v-55m0 25-12-14m12 26 16-15m0 0 2-16"/></g>
-              <g stroke="#b0a2bb" stroke-width="6"><path d="M574 273v-93m0 37-24-21m24 41 24-24m-24-13 12-23m-36 19-5-17m53 34 7-18"/></g>
-              <g stroke="#91b6a0" stroke-width="4"><path d="M532 283q-15-27-9-52m9 52q3-45 17-60m-17 60q-5-32 7-49"/></g>
+            <g fill="none" stroke-linecap="round" opacity=".45">
+              <g stroke="#dfac87" stroke-width="9"><path d="M42 275v-82m0 36-21-24m21 43 25-25m-25-14 14-26M21 205v-20m46 38 9-19"/></g>
+              <g stroke="#eee1ca" stroke-width="7"><path d="M82 282v-55m0 25-12-14m12 26 16-15m0 0 2-16"/></g>
+              <g stroke="#edcfaf" stroke-width="8"><path d="M574 273v-93m0 37-24-21m24 41 24-24m-24-13 12-23m-36 19-5-17m53 34 7-18"/></g>
+              <g stroke="#e6dbca" stroke-width="6"><path d="M532 283q-15-27-9-52m9 52q3-45 17-60m-17 60q-5-32 7-49"/></g>
             </g>
+            <g id="reef-perches" opacity=".32"></g>
             <g id="reef-nudibranchs"></g>
             <g fill="#cccfb0" opacity=".5"><circle cx="110" cy="296" r="2"/><circle cx="237" cy="281" r="2"/><circle cx="324" cy="297" r="1.5"/><circle cx="472" cy="291" r="2"/><circle cx="195" cy="261" r="1.5"/></g>
           </svg>
           <div class="track"><span></span></div><small>38 / 100 dives · Illustrative progress</small>
+          <p class="editor-note">Select a nudi to discover its garden name and who planted it.</p>
         </div>
       </div>
       <div class="heading"><div><div class="eyebrow">A little review goes a long way</div><h2>Before your next adventure.</h2></div><button class="text-button" data-page="knowledge">Visit the knowledge hub →</button></div>
@@ -543,6 +607,26 @@
     <p id="dive-save-status" role="status" aria-live="polite"></p>
     <button class="text-button" id="close-dive-dialog" type="button">Cancel</button>
   </dialog>
+  <dialog id="dive-celebration-dialog" aria-labelledby="dive-celebration-heading" aria-describedby="dive-celebration-copy dive-celebration-progress">
+    <form method="dialog"><button class="celebration-close" aria-label="Close celebration">&times;</button></form>
+    <svg class="celebration-nudi" viewBox="0 0 240 150" role="img" aria-label="Your newly planted garden nudibranch"><g id="celebration-nudi"></g></svg>
+    <div class="eyebrow">A little dive. A little more life.</div>
+    <h2 id="dive-celebration-heading">Slugtastic!</h2>
+    <p id="dive-celebration-copy">Our community coral garden just grew by another nudi thanks to your logged dive!</p>
+    <p id="dive-celebration-progress"></p>
+    <form method="dialog"><button class="button">Keep bubbling</button></form>
+  </dialog>
+  <dialog id="garden-nudi-dialog" aria-labelledby="garden-nudi-name" aria-describedby="garden-nudi-origin garden-nudi-planter">
+    <form method="dialog"><button class="celebration-close" aria-label="Close nudibranch details">&times;</button></form>
+    <svg class="celebration-nudi" viewBox="0 0 240 150" role="img" aria-label="This garden nudibranch"><g id="garden-nudi-portrait"></g></svg>
+    <div class="eyebrow">Meet a garden resident</div>
+    <h2 id="garden-nudi-name"></h2>
+    <p id="garden-nudi-origin"></p>
+    <p id="garden-nudi-planter" class="member-byline"></p>
+    <p class="editor-note">An invented Latin-style garden name inspired by this dive, not a real scientific species name.</p>
+    <button id="nudi-view-dive" class="button" type="button">View this dive</button>
+    <form method="dialog"><button class="button">Back to the garden</button></form>
+  </dialog>
   <dialog id="delete-dive-dialog" aria-labelledby="delete-dive-heading">
     <h2 id="delete-dive-heading">Delete this dive?</h2><p id="delete-dive-description"></p>
     <p>This permanently deletes the dive and its uploaded photos from your existing account. It cannot be undone.</p>
@@ -568,7 +652,7 @@
       <button class="button">Save profile</button>
     </form><p id="profile-status" role="status"></p><form method="dialog"><button class="text-button">Close</button></form>
   </dialog>
-  <dialog id="story-dialog" aria-labelledby="story-title"><div class="eyebrow">A sample page from the field journal</div><h2 id="story-title"></h2><p id="story-copy"></p><p class="editor-note">Fictional preview story. A live version would use a member's own words and photos with permission.</p><form method="dialog"><button class="button">Back to the journal</button></form></dialog>
+  <dialog id="story-dialog" aria-labelledby="story-title"><div class="eyebrow">A sample page from the field journal</div><h2 id="story-title"></h2><div id="story-gallery" hidden></div><p id="story-copy"></p><p class="editor-note">Fictional preview story. A live version would use a member's own words and photos with permission.</p><form method="dialog"><button class="button">Back to the journal</button></form></dialog>
   <script src="knowledge-checks.js"></script>
   <script src="knowledge-topics.js"></script>
   <script>
@@ -648,7 +732,19 @@
       renderReefQuestion();
     });
     renderReefQuestion();
-    const reefColors = ["#ba8ed6", "#ef9c72", "#76b5cf", "#db7ba7", "#84c7b6", "#e2c583"];
+    const nudiPalettes = [
+      { body:"#f5eee0", edge:"#efa337", pattern:"#202d36", accent:"#f07825", cerata:"#f0d8b7" },
+      { body:"#a6e4e4", edge:"#f0b338", pattern:"#172d39", accent:"#f46e29", cerata:"#69bace" },
+      { body:"#7b4ac8", edge:"#c9a6e4", pattern:"#f6d18a", accent:"#ffc045", cerata:"#ee7b32" },
+      { body:"#f2f4ed", edge:"#f5bc7b", pattern:"#aa5476", accent:"#e48034", cerata:"#f4e9d9" },
+      { body:"#efd155", edge:"#f6edc9", pattern:"#283742", accent:"#e99b2f", cerata:"#dfa941" },
+      { body:"#e8f2ef", edge:"#e9dcb9", pattern:"#2473b3", accent:"#f4ce3b", cerata:"#369ad1" },
+      { body:"#e5a5b9", edge:"#eee0d5", pattern:"#402c48", accent:"#f1ba66", cerata:"#b360a0" },
+      { body:"#233746", edge:"#f1c346", pattern:"#e6cc4f", accent:"#ef8b2f", cerata:"#536ab0" },
+      { body:"#a53d52", edge:"#edc494", pattern:"#f3dab2", accent:"#f2b476", cerata:"#d26857" },
+      { body:"#a6b9d4", edge:"#f6e7cb", pattern:"#20334e", accent:"#edaf36", cerata:"#a59bd1" }
+    ];
+    const nudiShapes = ["#sea-slug", "#striped-slug", "#aeolid-slug", "#spotted-slug", "#tubercle-slug", "#ribbon-slug"];
     const reefFans = document.getElementById("reef-fans");
     function growCoral(x, y, length, angle, depth, color) {
       const endX = x + Math.sin(angle) * length;
@@ -657,7 +753,7 @@
       branch.setAttribute("d", `M${x} ${y}Q${x + Math.sin(angle + .18) * length * .5} ${y - Math.cos(angle) * length * .5} ${endX} ${endY}`);
       branch.setAttribute("fill", "none");
       branch.setAttribute("stroke", color);
-      branch.setAttribute("stroke-width", String(depth * 1.1 + .4));
+      branch.setAttribute("stroke-width", String(depth * 1.4 + 1));
       branch.setAttribute("stroke-linecap", "round");
       reefFans.append(branch);
       if (depth > 0) {
@@ -665,20 +761,70 @@
         growCoral(endX, endY, length * .69, angle + .43, depth - 1, color);
       }
     }
-    growCoral(36, 274, 44, -.15, 5, "#c18b8e");
-    growCoral(589, 280, 48, .05, 5, "#a28cb9");
-    growCoral(506, 278, 25, -.2, 4, "#cfb394");
+    growCoral(36, 274, 44, -.15, 5, "#dfac87");
+    growCoral(589, 280, 48, .05, 5, "#edcfaf");
+    growCoral(506, 278, 25, -.2, 4, "#eee1ca");
+    let reefSeed = 71019;
+    const reefRandom = () => {
+      reefSeed = (Math.imul(reefSeed, 1664525) + 1013904223) >>> 0;
+      return reefSeed / 4294967296;
+    };
+    const coralColors = ["#d9a47b", "#edcfad", "#eee3cf", "#d5bca5", "#e4b48e"];
+    for (let colony = 0; colony < 13; colony++) {
+      growCoral(25 + colony * 47, 296, 48 + reefRandom() * 34,
+        (reefRandom() - .5) * .4, 4, coralColors[colony % coralColors.length]);
+    }
+    const perches = document.getElementById("reef-perches");
     const reefAnimals = document.getElementById("reef-nudibranchs");
-    for (let index = 0; index < 38; index++) {
+    const nudiBounds = [];
+    for (let index = 0; index < 100; index++) {
       const animal = document.createElementNS("http://www.w3.org/2000/svg", "use");
-      animal.setAttribute("href", ["#sea-slug", "#striped-slug", "#aeolid-slug", "#spotted-slug"][index % 4]);
-      const column = index % 10;
-      const row = Math.floor(index / 10);
-      const x = 104 + column * 43 + (row % 2) * 8 + Math.sin(index * 4.1) * 7;
-      const y = 151 + row * 41 + Math.sin(index * 2.3) * 12;
-      const scale = 0.48 + (index % 3) * 0.08;
-      animal.setAttribute("transform", `translate(${x} ${y}) rotate(${(index * 37) % 70 - 35}) scale(${scale})`);
-      animal.style.color = reefColors[index % reefColors.length];
+      animal.setAttribute("href", nudiShapes[index % nudiShapes.length]);
+      const scale = .32 + reefRandom() * .07;
+      const angle = (reefRandom() - .5) * 60;
+      const radians = angle * Math.PI / 180;
+      const artwork = document.querySelector(animal.getAttribute("href")).getBBox();
+      const corners = [[artwork.x, artwork.y], [artwork.x + artwork.width, artwork.y],
+        [artwork.x, artwork.y + artwork.height], [artwork.x + artwork.width, artwork.y + artwork.height]]
+        .map(([px, py]) => ({
+          x:scale * (px * Math.cos(radians) - py * Math.sin(radians)),
+          y:scale * (px * Math.sin(radians) + py * Math.cos(radians))
+        }));
+      const left = Math.min(...corners.map(point => point.x)) - 1;
+      const right = Math.max(...corners.map(point => point.x)) + 1;
+      const top = Math.min(...corners.map(point => point.y)) - 1;
+      const bottom = Math.max(...corners.map(point => point.y)) + 1;
+      let x, y, bounds;
+      let placed = false;
+      for (let attempt = 0; attempt < 20000; attempt++) {
+        x = 40 + reefRandom() * 540;
+        y = 48 + reefRandom() * 232;
+        bounds = { left:x + left, right:x + right, top:y + top, bottom:y + bottom };
+        if (nudiBounds.every(other => bounds.right + 2 < other.left || bounds.left > other.right + 2 ||
+          bounds.bottom + 2 < other.top || bounds.top > other.bottom + 2)) {
+          placed = true;
+          break;
+        }
+      }
+      if (!placed) throw new Error("Unable to place all 100 garden nudibranchs without overlap.");
+      nudiBounds.push(bounds);
+      const colonyX = 25 + Math.round((x - 25) / 47) * 47;
+      const coral = document.createElementNS(animal.namespaceURI, "path");
+      const joinY = Math.min(297, y + 30 + reefRandom() * 25);
+      coral.setAttribute("d", `M${colonyX} 303Q${colonyX - 9} ${joinY} ${colonyX} ${joinY}
+        Q${x - 12} ${y + 14} ${x} ${y + 4}
+        m-17 1q17 -5 34 0m-26 -1-5 -9m13 8 3 -11m5 11 7 -7`);
+      coral.setAttribute("fill", "none");
+      coral.setAttribute("stroke", coralColors[Math.round((x - 25) / 47) % coralColors.length]);
+      coral.setAttribute("stroke-width", "4");
+      coral.setAttribute("stroke-linecap", "round");
+      perches.append(coral);
+      animal.setAttribute("transform", `translate(${x} ${y}) rotate(${angle}) scale(${scale})`);
+      const palette = nudiPalettes[(index * 7 + Math.floor(index / nudiShapes.length)) % nudiPalettes.length];
+      animal.style.color = palette.body;
+      for (const part of ["edge", "pattern", "accent", "cerata"]) {
+        animal.style.setProperty(`--nudi-${part}`, palette[part]);
+      }
       reefAnimals.append(animal);
     }
     const stories = {

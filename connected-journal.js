@@ -5,6 +5,96 @@
   const atlas = document.querySelector(".world-panel svg");
   const animals = document.getElementById("reef-nudibranchs");
   const animalTemplates = [...animals.children].map(animal => animal.cloneNode(true));
+  const celebration = document.getElementById("dive-celebration-dialog");
+  const nudiDialog = document.getElementById("garden-nudi-dialog");
+  let plantedDives = [];
+  let activeNudiId = null;
+  let onlyMyNudis = false;
+  let collectionPage = 0;
+  const collectionPageSize = 6;
+  const collectionPager = document.getElementById("nudi-collection-pagination");
+  collectionPager.querySelectorAll("button").forEach(button => button.addEventListener("click", () => {
+    collectionPage += Number(button.dataset.direction);
+    renderCollection();
+    document.getElementById("nudi-collection-heading").focus();
+  }));
+  const myNudiButton = document.querySelector('[data-nudi-filter="mine"]');
+  function filterGarden() {
+    animals.querySelectorAll("[data-dive-id]").forEach(button => {
+      const mine = button.dataset.owned === "true";
+      button.classList.toggle("nudi-dimmed", onlyMyNudis && !mine);
+      button.classList.toggle("nudi-mine", onlyMyNudis && mine);
+    });
+    document.querySelectorAll("[data-nudi-filter]").forEach(button => {
+      button.setAttribute("aria-pressed", String((button.dataset.nudiFilter === "mine") === onlyMyNudis));
+    });
+    const status = document.getElementById("garden-mine-status");
+    status.hidden = !onlyMyNudis;
+    const visible = plantedDives.slice(0, animalTemplates.length).filter(dive => dive.ownedByCurrentUser).length;
+    status.textContent = `${visible} of your nudis ${visible === 1 ? "is" : "are"} in the shared garden. Your full collection includes every dive you've planted.`;
+  }
+  document.querySelectorAll("[data-nudi-filter]").forEach(button => button.addEventListener("click", () => {
+    onlyMyNudis = button.dataset.nudiFilter === "mine";
+    filterGarden();
+  }));
+  document.getElementById("open-nudi-collection").addEventListener("click", () => {
+    collectionPage = 0;
+    renderCollection();
+    showPage("logbook");
+    document.getElementById("nudi-collection-heading").scrollIntoView({ block:"start" });
+  });
+  function openNudi(dive, index) {
+    activeNudiId = dive.id;
+    renderNudiDetails(dive, index);
+    nudiDialog.showModal();
+  }
+  document.getElementById("nudi-view-dive").addEventListener("click", () => {
+    const dive = records.find(record => record.id === activeNudiId);
+    if (!dive) return;
+    nudiDialog.close();
+    showStory(dive);
+  });
+  const plantingOrder = dives => [...dives].sort((a, b) =>
+    (a.created_at || "").localeCompare(b.created_at || "") || a.id.localeCompare(b.id));
+  function nudiName(dive) {
+    const latinStem = value => {
+      const letters = value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z]/g, "");
+      if (letters) return letters;
+      // Keep names deterministic for sites written entirely in non-Latin scripts.
+      let hash = 0;
+      for (const character of value) hash = (Math.imul(hash, 31) + character.codePointAt(0)) >>> 0;
+      return "thalass" + Array.from({ length: 5 }, () => {
+        const letter = String.fromCharCode(97 + hash % 26);
+        hash = Math.floor(hash / 26);
+        return letter;
+      }).join("");
+    };
+    const country = latinStem(dive.country).slice(0, 6);
+    const genus = country + (/[aeiou]$/.test(country) ? "doris" : "odoris");
+    const species = latinStem(dive.place).slice(0, 20) + "ensis";
+    return `${genus[0].toUpperCase()}${genus.slice(1)} ${species}`;
+  }
+  function renderNudiDetails(dive, index) {
+    const portrait = animalTemplates[index % animalTemplates.length].cloneNode(true);
+    portrait.setAttribute("transform", "translate(120 78) scale(2.5)");
+    document.getElementById("garden-nudi-portrait").replaceChildren(portrait);
+    document.getElementById("garden-nudi-name").textContent = nudiName(dive);
+    document.getElementById("garden-nudi-origin").textContent = `Inspired by a dive at ${dive.place}, ${dive.country}.`;
+    document.getElementById("garden-nudi-planter").replaceChildren(
+      createMemberAvatar(dive.diver, dive.authorPhoto), document.createTextNode(`Planted by ${dive.diver}.`));
+  }
+  window.addEventListener("dive-created", event => {
+    const count = event.detail.count;
+    const plantedIndex = plantedDives.findIndex(dive => dive.id === event.detail.id);
+    const animal = animalTemplates[(plantedIndex >= 0 ? plantedIndex : count - 1) % animalTemplates.length].cloneNode(true);
+    animal.setAttribute("transform", "translate(120 78) scale(2.5)");
+    document.getElementById("celebration-nudi").replaceChildren(animal);
+    const remaining = Math.max(0, 100 - count);
+    document.getElementById("dive-celebration-progress").textContent = remaining
+      ? `${remaining} more ${remaining === 1 ? "dive" : "dives"} to go until we reach 100 dives together!`
+      : `We did it! ${count} dives together. Our 100-dive garden is full - let's keep sharing our adventures!`;
+    celebration.showModal();
+  });
   const garden = animals.closest(".garden");
   const activities = [...document.querySelectorAll(".journal-row .activity")];
   const featured = document.querySelector(".hero [data-story]");
@@ -48,6 +138,14 @@
   nextPage.addEventListener("click", () => { destinationPage++; filterDestinations(); document.getElementById("destination-title").focus(); });
   document.getElementById("destination-title").tabIndex = -1;
   let activeStoryId = null;
+  let storyPhotoIndex = 0;
+  const storyGallery = document.getElementById("story-gallery");
+  dialog.addEventListener("close", () => {
+    storyGallery.replaceChildren();
+    storyGallery.hidden = true;
+    activeStoryId = null;
+    storyPhotoIndex = 0;
+  });
   const countryKey = country => country.trim().toLocaleLowerCase("en");
   const countryPositions = new Map(window.DiveCompassCountries.map(country => [countryKey(country.name), country]));
   const countryAliases = {
@@ -84,18 +182,53 @@
   const caption = document.querySelector(".map-caption");
   caption.lastChild.textContent = " public-domain boundaries. Small islands may be omitted. Flags show approximate country positions, not verified dive sites.";
   document.getElementById("atlas-description").textContent = "World map with selectable dive flags for mapped community countries. The country buttons offer all recorded destinations.";
-  garden.querySelector("svg desc").textContent = "Artistic nudibranch illustrations among corals and rocks. The displayed count follows community dives, up to the illustration limit. Not a species-identification diagram.";
+  garden.querySelector("svg desc").textContent = "Artistic nudibranch illustrations scattered on branching corals among rocks. One nudi per community dive, with space for 100. Not a species-identification diagram.";
   document.querySelector(".preview").textContent = "OneAD diving community · Share generously. Respect the ocean.";
 
   function showStory(dive) {
     activeStoryId = dive.id;
+    storyPhotoIndex = 0;
+    renderStory(dive);
+    dialog.showModal();
+  }
+  function renderStory(dive) {
     const byline = dialog.querySelector(".editor-note");
     byline.classList.add("member-byline");
     byline.replaceChildren(createMemberAvatar(dive.diver, dive.authorPhoto), document.createTextNode(dive.diver || "Community member"));
     document.getElementById("story-title").textContent = dive.place;
     document.getElementById("story-copy").textContent =
       [dive.country, dive.diver, dive.date].filter(Boolean).join(" · ") + "\n\n" + (dive.highlight || "No story added yet.");
-    dialog.showModal();
+    const photos = dive.photos && dive.photos.length ? dive.photos : dive.photo ? [dive.photo] : [];
+    storyGallery.replaceChildren();
+    storyGallery.hidden = !photos.length;
+    if (!photos.length) { storyPhotoIndex = 0; return; }
+    storyPhotoIndex = Math.min(storyPhotoIndex, photos.length - 1);
+    const image = document.createElement("img");
+    const counter = text("span", "");
+    counter.setAttribute("role", "status");
+    const displayPhoto = () => {
+      image.src = photos[storyPhotoIndex];
+      image.alt = `${dive.place} · Photo ${storyPhotoIndex + 1} of ${photos.length}`;
+      counter.textContent = `${storyPhotoIndex + 1} / ${photos.length}`;
+    };
+    storyGallery.append(image);
+    if (photos.length > 1) {
+      const controls = document.createElement("div");
+      controls.className = "dive-gallery-controls";
+      const buttons = [-1, 1].map(direction => {
+        const button = text("button", direction < 0 ? "‹" : "›");
+        button.type = "button";
+        button.setAttribute("aria-label", `${direction < 0 ? "Previous" : "Next"} dive photo`);
+        button.addEventListener("click", () => {
+          storyPhotoIndex = (storyPhotoIndex + direction + photos.length) % photos.length;
+          displayPhoto();
+        });
+        return button;
+      });
+      controls.append(buttons[0], counter, buttons[1]);
+      storyGallery.append(controls);
+    }
+    displayPhoto();
   }
   featuredLive.addEventListener("click", () => {
     const dive = records.find(record => record.photos && record.photos.length) || records[0];
@@ -170,8 +303,58 @@
     countryTabs.querySelectorAll("button").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.liveCountry === selectedCountry)));
     atlas.querySelectorAll("[data-live-country]").forEach(marker => marker.setAttribute("aria-pressed", String(marker.dataset.liveCountry === selectedCountry)));
   }
+  function renderCollection() {
+    const mine = plantedDives.map((dive, index) => ({ dive, index })).filter(({ dive }) => dive.ownedByCurrentUser);
+    const pages = Math.max(1, Math.ceil(mine.length / collectionPageSize));
+    collectionPage = Math.max(0, Math.min(collectionPage, pages - 1));
+    collectionPager.hidden = mine.length <= collectionPageSize;
+    collectionPager.querySelector("span").textContent = `Page ${collectionPage + 1} of ${pages}`;
+    collectionPager.querySelector('[data-direction="-1"]').disabled = collectionPage === 0;
+    collectionPager.querySelector('[data-direction="1"]').disabled = collectionPage === pages - 1;
+    document.getElementById("nudi-collection-grid").replaceChildren(...mine
+      .slice(collectionPage * collectionPageSize, (collectionPage + 1) * collectionPageSize)
+      .map(({ dive, index }) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "nudi-collection-card";
+        card.dataset.diveId = dive.id;
+        card.setAttribute("aria-haspopup", "dialog");
+        const portrait = document.createElementNS(animals.namespaceURI, "svg");
+        portrait.classList.add("celebration-nudi");
+        portrait.setAttribute("viewBox", "0 0 240 150");
+        portrait.setAttribute("aria-hidden", "true");
+        const animal = animalTemplates[index % animalTemplates.length].cloneNode(true);
+        animal.setAttribute("transform", "translate(120 78) scale(2.5)");
+        portrait.append(animal);
+        card.append(portrait, text("strong", nudiName(dive)),
+          text("span", `${dive.place} · ${dive.country}`), text("span", dive.date || ""),
+          text("span", "Meet this nudi ↗"));
+        card.addEventListener("click", () => openNudi(dive, index));
+        return card;
+      }));
+  }
   function update(data) {
     records = data ? data.dives : [];
+    plantedDives = plantingOrder(records);
+    const activeNudiIndex = plantedDives.findIndex(dive => dive.id === activeNudiId);
+    if (activeNudiIndex >= 0) {
+      if (nudiDialog.open) renderNudiDetails(plantedDives[activeNudiIndex], activeNudiIndex);
+    } else {
+      nudiDialog.close();
+      activeNudiId = null;
+      document.getElementById("garden-nudi-portrait").replaceChildren();
+      for (const id of ["garden-nudi-name", "garden-nudi-origin", "garden-nudi-planter"]) document.getElementById(id).replaceChildren();
+    }
+    const mine = plantedDives.map((dive, index) => ({ dive, index })).filter(({ dive }) => dive.ownedByCurrentUser);
+    if (!data) onlyMyNudis = false;
+    myNudiButton.disabled = !data;
+    myNudiButton.textContent = `My nudis · ${mine.length}`;
+    document.getElementById("nudi-collection-status").textContent = !data
+      ? "Sign in to discover your planted nudis."
+      : mine.length ? `You've planted ${mine.length} ${mine.length === 1 ? "nudi" : "nudis"}. One little creature for every dive memory.`
+        : "Your collection starts with your first logged dive. Plant a nudi and bring our reef to life!";
+    if (!data) collectionPage = 0;
+    renderCollection();
     const divers = new Map();
     records.forEach(dive => divers.set(diverKey(dive), dive.diver));
     if (!divers.has(selectedDiver)) {
@@ -182,7 +365,15 @@
       ...[...divers].sort((a, b) => a[1].localeCompare(b[1])).map(([id, name]) => new Option(name, id)));
     diverSelect.value = selectedDiver;
     diverSelect.disabled = !data || !records.length;
-    if (dialog.open && (!data || !records.some(dive => dive.id === activeStoryId))) dialog.close();
+    if (dialog.open) {
+      const story = records.find(dive => dive.id === activeStoryId);
+      if (story) renderStory(story);
+      else {
+        storyGallery.replaceChildren();
+        storyGallery.hidden = true;
+        dialog.close();
+      }
+    }
     if (!data) {
       document.getElementById("story-title").textContent = "";
       document.getElementById("story-copy").textContent = "";
@@ -245,7 +436,31 @@
     oldNote.textContent = mapNote + (unmappedCountries.length
       ? ` No map position found for: ${unmappedCountries.join(", ")}. These entries remain available in the country filters; edit their country to use the dropdown.`
       : "");
-    animals.replaceChildren(...animalTemplates.slice(0, Math.min(records.length, animalTemplates.length)).map(node => node.cloneNode(true)));
+    animals.replaceChildren(...plantedDives.slice(0, animalTemplates.length).map((dive, index) => {
+      const animal = animalTemplates[index].cloneNode(true);
+      const button = document.createElementNS(animals.namespaceURI, "g");
+      button.setAttribute("transform", animal.getAttribute("transform"));
+      animal.removeAttribute("transform");
+      button.dataset.diveId = dive.id;
+      button.dataset.owned = String(dive.ownedByCurrentUser === true);
+      button.setAttribute("role", "button");
+      button.setAttribute("tabindex", "0");
+      button.setAttribute("aria-label", `Meet ${nudiName(dive)}, planted by ${dive.diver}`);
+      button.setAttribute("aria-haspopup", "dialog");
+      const hitArea = document.createElementNS(animals.namespaceURI, "ellipse");
+      hitArea.classList.add("nudi-hit-area");
+      hitArea.setAttribute("rx", "39");
+      hitArea.setAttribute("ry", "30");
+      hitArea.setAttribute("fill", "transparent");
+      button.append(hitArea, animal);
+      const open = () => openNudi(dive, index);
+      button.addEventListener("click", open);
+      button.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); }
+      });
+      return button;
+    }));
+    filterGarden();
     garden.querySelector(".track span").style.width = `${Math.min(records.length, 100)}%`;
     const progress = garden.querySelector("small");
     progress.classList.add("garden-progress");

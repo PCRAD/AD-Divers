@@ -9,6 +9,15 @@
   const profileForm = document.getElementById("connected-profile");
   const logbookStatus = document.getElementById("logbook-status");
   const dives = document.getElementById("live-dives");
+  const divePager = document.getElementById("logbook-pagination");
+  let logbookDives = [];
+  let divePage = 0;
+  const divePageSize = 6;
+  divePager.querySelectorAll("button").forEach(button => button.addEventListener("click", () => {
+    divePage += Number(button.dataset.direction);
+    renderDivePage();
+    document.getElementById("logbook-dives-heading").focus();
+  }));
   let currentUser = null;
   let profile = null;
   let unsubscribers = [];
@@ -45,10 +54,22 @@
   function renderData(data) {
     window.dispatchEvent(new CustomEvent("community-data", { detail: data }));
     showProfile(data.profile);
+    logbookDives = data.dives;
+    renderDivePage();
+    connection.textContent = `Signed in${data.profile ? ` as ${data.profile.username}` : " · Create your profile to contribute"}.`;
+  }
+
+  function renderDivePage() {
+    const pageCount = Math.max(1, Math.ceil(logbookDives.length / divePageSize));
+    divePage = Math.max(0, Math.min(divePage, pageCount - 1));
+    divePager.hidden = logbookDives.length <= divePageSize;
+    divePager.querySelector("span").textContent = `Page ${divePage + 1} of ${pageCount}`;
+    divePager.querySelector('[data-direction="-1"]').disabled = divePage === 0;
+    divePager.querySelector('[data-direction="1"]').disabled = divePage === pageCount - 1;
     dives.replaceChildren();
-    logbookStatus.textContent = `${data.dives.length} community dives`;
-    if (!data.dives.length) logbookStatus.textContent = "No dives have been logged yet.";
-    data.dives.forEach(dive => {
+    logbookStatus.textContent = `${logbookDives.length} community dives`;
+    if (!logbookDives.length) logbookStatus.textContent = "No dives have been logged yet.";
+    logbookDives.slice(divePage * divePageSize, (divePage + 1) * divePageSize).forEach(dive => {
       const article = document.createElement("article");
       article.className = "live-dive";
       const title = document.createElement("h2");
@@ -146,7 +167,6 @@
       }
       dives.append(article);
     });
-    connection.textContent = `Signed in${data.profile ? ` as ${data.profile.username}` : " · Create your profile to contribute"}.`;
   }
 
   if (!backend) {
@@ -326,6 +346,7 @@
       const requestVersion = ++dataVersion;
       const data = await backend.call("getAppData");
       if (version === authVersion && requestVersion === dataVersion) renderData(data);
+      return data;
     }
     diveForm.addEventListener("submit", async event => {
       event.preventDefault();
@@ -355,13 +376,16 @@
         const ordered = files.length ? [files[mainIndex], ...files.filter((_, index) => index !== mainIndex)] : [];
         for (const file of ordered) payload.photos.push(await preparePhoto(file, 1600));
         if (version !== authVersion || !currentUser) throw new Error("Your session changed. Sign in and try again.");
-        await backend.call("saveDive", payload);
+        const savedDive = await backend.call("saveDive", payload);
         saved = true;
         if (version !== authVersion) return;
-        await refreshDives(version);
+        if (!payload.id) divePage = 0;
+        const data = await refreshDives(version);
+        if (version !== authVersion) return;
         diveDialog.close();
         showPage("logbook");
         logbookStatus.textContent += " · Dive saved.";
+        if (!payload.id) window.dispatchEvent(new CustomEvent("dive-created", { detail: { count: data.dives.length, id: savedDive.id } }));
       } catch (error) {
         diveMessage.textContent = saved ? `Dive was saved, but refresh failed. Do not resubmit; reload the page. ${error.message}` : error.message;
       } finally {
@@ -426,6 +450,9 @@
     // Supabase can re-emit sign-in on tab focus or token renewal.
     if (user && currentUser && user.id === currentUser.id) {
       currentUser = user;
+      logbookDives = [];
+      divePage = 0;
+      divePager.hidden = true;
       if (error) connection.textContent = `Profile loading failed: ${error.message}`;
       return;
     }
@@ -441,6 +468,7 @@
     if (profileDialog.open) profileDialog.close();
     if (diveDialog.open) diveDialog.close();
     if (deleteDialog.open) deleteDialog.close();
+    document.getElementById("dive-celebration-dialog").close();
     profileForm.elements.username.value = savedProfile ? savedProfile.username : "";
     profileForm.elements.photo.value = "";
     if (!user) {
