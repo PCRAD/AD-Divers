@@ -62,6 +62,9 @@
     .destination p { font-size:12px; color:var(--muted); max-width:270px; line-height:1.7; }
     .map { position:absolute; width:310px; right:-5px; bottom:10px; opacity:.65; }
     .garden { border-radius:7px; padding:28px; background:var(--navy); color:#fff; }
+    .split > .garden { grid-column:1 / -1; }
+    .garden-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:18px; }
+    .garden-header .button { min-height:44px; }
     .garden .eyebrow { color:#b7d7c5; }
     .garden h2 { font-size:25px; }
     .garden .garden-goal { display:block; margin-top:8px; color:#b7d7c5; font-size:36px; line-height:1.15; }
@@ -299,6 +302,11 @@
     .live-dive-photo { width:100%; height:190px; object-fit:cover; border-radius:4px; }
     .card-gallery { position:relative; min-width:0; overflow:hidden; }
     .story-grid .card:first-child .card-gallery { position:absolute; inset:0; }
+    .story-grid .card:not(:first-child) .card-gallery { min-height:225px; }
+    .story-grid .card:not(:first-child) .card-gallery img { position:absolute; inset:0; min-height:0; }
+    @media(max-width:600px) {
+      .story-grid .card:not(:first-child) .card-gallery { min-height:180px; height:180px; }
+    }
     .story-grid .card:first-child::after { pointer-events:none; }
     .card-photo-arrow { position:absolute; top:50%; transform:translateY(-50%); z-index:2; width:44px; height:44px; border:1px solid #ffffff80; border-radius:50%; background:#082b34d9; color:white; font-size:30px; line-height:1; cursor:pointer; }
     .card-photo-arrow.previous { left:8px; }
@@ -309,6 +317,16 @@
     .dive-gallery-controls span { font-size:12px; }
     #story-gallery img { display:block; width:100%; max-height:340px; object-fit:contain; border-radius:4px; background:#123c47; }
     #story-gallery .dive-gallery-controls button { min-width:44px; min-height:44px; font-size:23px; }
+    @media(min-width:851px) {
+      .split > .garden { display:grid; grid-template-columns:300px minmax(0,1fr); grid-template-rows:repeat(8,auto); column-gap:24px; height:474px; padding:24px; }
+      .split > .garden > :not(.reef-scene) { grid-column:1; }
+      .split > .garden .reef-scene { grid-column:2; grid-row:1 / -1; width:100%; height:100%; min-height:0; margin:0; }
+      .split > .garden .garden-goal { font-size:28px; }
+      .split > .garden .garden-header { gap:10px; }
+      .split > .garden p { margin:6px 0; }
+      .split > .garden #garden-nudi-filter { margin-top:8px; }
+      .split > .garden .track { margin:8px 0 0; }
+    }
     #live-dives { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:20px; }
     .live-dive { padding:22px; background:white; border:1px solid var(--line); overflow-wrap:anywhere; }
     .live-dive p { line-height:1.7; font-size:14px; white-space:pre-wrap; }
@@ -363,8 +381,7 @@
         <div class="dispatch"><span class="ring" aria-hidden="true"></span><div class="eyebrow">Keep your curiosity afloat</div><h2>There’s always more beneath the surface.</h2><p>Revisit the essentials, discover a new kind of dive, and find inspiration for your next descent.</p><button class="button" data-page="knowledge">Explore the knowledge hub →</button></div>
       </div>
       <div class="split">
-        <div class="destination"><div class="eyebrow">Our blue planet</div><h2>Different oceans.<br>Shared adventures.</h2><p>Explore sample field notes from Indonesia, Maldives, and Egypt.</p><button class="text-button" data-demo="Map concept only. A live map would need verified location data.">Explore destinations →</button><img class="map" src="world-map.svg" alt="" aria-hidden="true"></div>
-        <div class="garden"><div class="eyebrow">Our community coral garden</div><h2>Let's reach<span class="garden-goal">100 dives together.</span></h2><p>More dives. More nudis. Log yours and bring our reef to life.</p>
+        <div class="garden"><div class="garden-header"><div><div class="eyebrow">Our community coral garden</div><h2>Let's reach<span class="garden-goal">100 dives together.</span></h2></div><button type="button" class="button pale" data-log-dive><span aria-hidden="true">＋</span> Log your dive</button></div><p>More dives. More nudis. Log yours and bring our reef to life.</p>
           <div id="garden-nudi-filter" role="group" aria-label="Highlight garden nudis"><button type="button" data-nudi-filter="all" aria-pressed="true">All nudis</button><button type="button" data-nudi-filter="mine" aria-pressed="false" disabled>My nudis · 0</button></div>
           <p id="garden-mine-status" role="status" hidden></p>
           <button id="open-nudi-collection" class="text-button" type="button">Explore my nudi collection →</button>
@@ -852,9 +869,6 @@
       document.querySelectorAll("[data-filter]").forEach(button => { button.setAttribute("aria-pressed", String(button.dataset.filter === name)); });
     }
     document.querySelectorAll("[data-page]").forEach(button => button.addEventListener("click", () => showPage(button.dataset.page)));
-    const destinationButton = document.querySelector(".destination button");
-    destinationButton.removeAttribute("data-demo");
-    destinationButton.addEventListener("click", () => showPage("destinations"));
     function selectCountry(country) {
       document.querySelectorAll("[data-country]").forEach(button => {
         button.setAttribute("aria-pressed", String(button.dataset.country === country));

@@ -396,7 +396,6 @@
       if (dive) activity.append(createMemberAvatar(dive.diver, dive.authorPhoto),
         text("p", `${dive.diver} logged ${dive.place}, ${dive.country}.`));
     });
-    document.querySelector(".destination p").textContent = data ? `Explore our dives across ${countries.size} destinations.` : "Sign in to explore our community destinations.";
     countryTabs.replaceChildren();
     atlas.querySelectorAll('[data-country-marker],[data-live-country]').forEach(marker => marker.remove());
     const unmappedCountries = [];
