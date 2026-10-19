@@ -526,7 +526,7 @@
     <h2 id="connected-dive-heading">Log a dive.</h2>
     <form id="connected-dive-form" class="connected-form">
       <label>Dive site<input name="place" required maxlength="120"></label>
-      <label>Country<input name="country" required maxlength="80"></label>
+      <label>Country<select name="country" required><option value="">Select a country or territory</option></select></label>
       <label>Date<input name="date" type="date" required></label>
       <label>Maximum depth in metres (optional)<input name="depth" type="number" min="0" step="0.1"></label>
       <label>Your dive story<textarea name="highlight" maxlength="1000"></textarea></label>
