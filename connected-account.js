@@ -31,6 +31,9 @@
   let writingDive = false;
   let photoPreviewUrl = "";
   let selectedPhotos = [];
+  let selectedShorts = [];
+  let shortSelectionVersion = 0;
+  let checkingShorts = false;
   let thumbnailUrls = [];
   let dataVersion = 0;
   const countrySelect = diveForm.elements.country;
@@ -165,6 +168,16 @@
         });
         displayPhoto();
       }
+      (dive.videos || []).forEach((url, index) => {
+        const video = document.createElement("video");
+        video.className = "live-dive-photo";
+        video.controls = true;
+        video.playsInline = true;
+        video.preload = "metadata";
+        video.src = url;
+        video.setAttribute("aria-label", `${dive.place} · Short ${index + 1} of ${dive.videos.length}`);
+        article.append(video);
+      });
       dives.append(article);
     });
   }
@@ -271,15 +284,46 @@
         document.getElementById("clear-dive-photos").hidden = !selectedPhotos.length;
         updatePhotoPreview();
       }
-    function openDive(dive = null) {
-      if (!currentUser) { authDialog.showModal(); return; }
-      if (!profile) { profileDialog.showModal(); return; }
-      editingDive = dive;
-      diveForm.reset();
-      selectedPhotos = [];
-      renderSelectedPhotos();
-      document.getElementById("selected-photo-status").textContent = "";
-      diveForm.elements.photos.setCustomValidity("");
+      function renderSelectedShorts() {
+        const list = document.getElementById("selected-dive-shorts");
+        list.replaceChildren();
+        selectedShorts.forEach(file => {
+          const row = document.createElement("div");
+          row.className = "selected-short-row";
+          const name = document.createElement("span");
+          name.textContent = file.name;
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "text-button";
+          remove.textContent = "Remove";
+          remove.setAttribute("aria-label", `Remove ${file.name}`);
+          remove.addEventListener("click", () => {
+            if (writingDive) return;
+            selectedShorts = selectedShorts.filter(short => short !== file);
+            renderSelectedShorts();
+            document.getElementById("selected-short-status").textContent = `${file.name} removed. ${selectedShorts.length} shorts selected.`;
+            diveForm.elements.shorts.focus();
+          });
+          row.append(name, remove);
+          list.append(row);
+        });
+        document.getElementById("clear-dive-shorts").hidden = !selectedShorts.length;
+      }
+      function openDive(dive = null) {
+        if (!currentUser) { authDialog.showModal(); return; }
+        if (!profile) { profileDialog.showModal(); return; }
+        shortSelectionVersion++;
+        checkingShorts = false;
+        diveForm.elements.shorts.disabled = false;
+        editingDive = dive;
+        diveForm.reset();
+        selectedPhotos = [];
+        selectedShorts = [];
+        renderSelectedPhotos();
+        renderSelectedShorts();
+        document.getElementById("selected-photo-status").textContent = "";
+        document.getElementById("selected-short-status").textContent = "";
+        diveForm.elements.photos.setCustomValidity("");
       diveForm.elements.mainPhoto.replaceChildren(new Option("Select photos first", "0"));
       diveForm.elements.mainPhoto.disabled = true;
       countrySelect.querySelectorAll("[data-existing-country]").forEach(option => option.remove());
@@ -299,6 +343,9 @@
       document.getElementById("dive-photo-help").textContent = dive
         ? "Leave photos empty to keep all current pictures. Selecting new photos replaces all current pictures after confirmation. You can change the current main photo with the gallery controls."
         : "Choose up to 10 photos, then select the main photo.";
+      document.getElementById("dive-short-help").textContent = dive
+        ? "Leave shorts empty to keep current clips. Selecting new shorts replaces all current clips after confirmation."
+        : "Short videos appear in the dive story and community galleries.";
       diveMessage.textContent = "";
       updatePhotoPreview();
       diveDialog.showModal();
@@ -309,13 +356,19 @@
     document.getElementById("close-dive-dialog").addEventListener("click", () => diveDialog.close());
     diveDialog.addEventListener("cancel", event => { if (writingDive) event.preventDefault(); });
     diveDialog.addEventListener("close", () => {
+      shortSelectionVersion++;
+      checkingShorts = false;
+      diveForm.elements.shorts.disabled = false;
       if (photoPreviewUrl) URL.revokeObjectURL(photoPreviewUrl);
       photoPreviewUrl = "";
       thumbnailUrls.forEach(url => URL.revokeObjectURL(url));
       thumbnailUrls = [];
       selectedPhotos = [];
+      selectedShorts = [];
       document.getElementById("selected-dive-photos").replaceChildren();
+      document.getElementById("selected-dive-shorts").replaceChildren();
       diveForm.elements.photos.value = "";
+      diveForm.elements.shorts.value = "";
     });
     diveForm.elements.photos.addEventListener("change", () => {
       const files = [...diveForm.elements.photos.files];
@@ -335,11 +388,45 @@
       renderSelectedPhotos(main);
       message.textContent = `${selectedPhotos.length} / 10 photos selected.`;
     });
+    diveForm.elements.shorts.addEventListener("change", async () => {
+      const files = [...diveForm.elements.shorts.files];
+      diveForm.elements.shorts.value = "";
+      if (writingDive) return;
+      const message = document.getElementById("selected-short-status");
+      if (selectedShorts.length + files.length > 3) {
+        message.textContent = "No shorts added: the limit is 3. Remove a selected short before adding more.";
+        return;
+      }
+      const version = shortSelectionVersion;
+      checkingShorts = true;
+      diveForm.elements.shorts.disabled = true;
+      message.textContent = "Checking video type, size, and duration…";
+      try {
+        await Promise.all(files.map(validateCommunityShort));
+        if (version !== shortSelectionVersion) return;
+        selectedShorts.push(...files);
+        renderSelectedShorts();
+        message.textContent = `${selectedShorts.length} / 3 shorts selected.`;
+      } catch (error) {
+        if (version === shortSelectionVersion) message.textContent = error.message;
+      } finally {
+        if (version === shortSelectionVersion) {
+          checkingShorts = false;
+          diveForm.elements.shorts.disabled = false;
+        }
+      }
+    });
     document.getElementById("clear-dive-photos").addEventListener("click", () => {
       if (writingDive) return;
       selectedPhotos = [];
       renderSelectedPhotos();
       document.getElementById("selected-photo-status").textContent = "Selection cleared. Existing saved photos are unchanged.";
+    });
+    document.getElementById("clear-dive-shorts").addEventListener("click", () => {
+      if (writingDive) return;
+      selectedShorts = [];
+      renderSelectedShorts();
+      document.getElementById("selected-short-status").textContent = "Selection cleared. Existing saved shorts are unchanged.";
     });
     diveForm.elements.mainPhoto.addEventListener("change", updatePhotoPreview);
     async function refreshDives(version) {
@@ -351,26 +438,33 @@
     diveForm.addEventListener("submit", async event => {
       event.preventDefault();
       if (writingDive) return;
+      if (checkingShorts) {
+        diveMessage.textContent = "Wait for the selected shorts to finish checking before saving.";
+        return;
+      }
       const version = authVersion;
       const files = [...selectedPhotos];
+      const shorts = [...selectedShorts];
       const place = diveForm.elements.place.value.trim();
       const country = diveForm.elements.country.value.trim();
-      if (!place || !country || files.length > 10) {
-        diveMessage.textContent = "Enter a dive site and country, and choose no more than 10 photos.";
+      if (!place || !country || files.length > 10 || shorts.length > 3) {
+        diveMessage.textContent = "Enter a dive site and country, and choose no more than 10 photos and 3 shorts.";
         return;
       }
       if (editingDive && files.length && !window.confirm("Replace all existing photos for this dive? The previous photos will be deleted.")) return;
+      if (editingDive && shorts.length && !window.confirm("Replace all existing shorts for this dive? The previous clips will be deleted.")) return;
       const payload = {
         id: editingDive ? editingDive.id : undefined, place, country,
         date: diveForm.elements.date.value, depth: diveForm.elements.depth.value,
         highlight: diveForm.elements.highlight.value, flag: editingDive ? editingDive.flag : "",
-        replacePhotos: files.length > 0, photos: []
+        replacePhotos: files.length > 0, photos: [],
+        replaceShorts: shorts.length > 0, shorts
       };
       const mainIndex = Number(diveForm.elements.mainPhoto.value);
       writingDive = true;
       diveForm.querySelector('button[type="submit"]').disabled = true;
       document.getElementById("close-dive-dialog").disabled = true;
-      diveMessage.textContent = "Processing photos and saving dive…";
+      diveMessage.textContent = "Processing media and saving dive…";
       let saved = false;
       try {
         const ordered = files.length ? [files[mainIndex], ...files.filter((_, index) => index !== mainIndex)] : [];

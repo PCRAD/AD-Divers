@@ -18,3 +18,37 @@ async function prepareCommunityPhoto(file, maximumDimension = 800) {
     bitmap.close();
   }
 }
+
+function validateCommunityShort(file) {
+  if (!["video/mp4", "video/webm"].includes(file.type) || file.size > 50 * 1024 * 1024) {
+    return Promise.reject(new Error("Choose an MP4 or WebM short no larger than 50 MB."));
+  }
+  return new Promise((resolve, reject) => {
+    const video = document.createElement("video");
+    const url = URL.createObjectURL(file);
+    let finished = false;
+    const finish = error => {
+      if (finished) return;
+      finished = true;
+      URL.revokeObjectURL(url);
+      video.onloadedmetadata = null;
+      video.onerror = null;
+      video.removeAttribute("src");
+      video.load();
+      if (error) reject(error);
+      else resolve(file);
+    };
+    video.preload = "metadata";
+    video.onloadedmetadata = () => {
+      if (!Number.isFinite(video.duration) || video.duration <= 0) {
+        finish(new Error("Could not read the short's duration."));
+      } else if (video.duration > 10) {
+        finish(new Error("Each short must be 10 seconds or shorter."));
+      } else {
+        finish();
+      }
+    };
+    video.onerror = () => finish(new Error(`Could not read ${file.name}. Choose a playable MP4 or WebM video.`));
+    video.src = url;
+  });
+}

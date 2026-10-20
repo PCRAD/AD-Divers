@@ -199,20 +199,33 @@
     document.getElementById("story-copy").textContent =
       [dive.country, dive.diver, dive.date].filter(Boolean).join(" · ") + "\n\n" + (dive.highlight || "No story added yet.");
     const photos = dive.photos && dive.photos.length ? dive.photos : dive.photo ? [dive.photo] : [];
+    const media = [
+      ...photos.map(url => ({ type: "photo", url })),
+      ...(dive.videos || []).map(url => ({ type: "video", url }))
+    ];
     storyGallery.replaceChildren();
-    storyGallery.hidden = !photos.length;
-    if (!photos.length) { storyPhotoIndex = 0; return; }
-    storyPhotoIndex = Math.min(storyPhotoIndex, photos.length - 1);
-    const image = document.createElement("img");
+    storyGallery.hidden = !media.length;
+    if (!media.length) { storyPhotoIndex = 0; return; }
+    storyPhotoIndex = Math.min(storyPhotoIndex, media.length - 1);
     const counter = text("span", "");
     counter.setAttribute("role", "status");
     const displayPhoto = () => {
-      image.src = photos[storyPhotoIndex];
-      image.alt = `${dive.place} · Photo ${storyPhotoIndex + 1} of ${photos.length}`;
-      counter.textContent = `${storyPhotoIndex + 1} / ${photos.length}`;
+      const item = media[storyPhotoIndex];
+      const element = document.createElement(item.type === "video" ? "video" : "img");
+      element.src = item.url;
+      if (item.type === "video") {
+        element.controls = true;
+        element.playsInline = true;
+        element.preload = "metadata";
+        element.setAttribute("aria-label", `${dive.place} · Short ${storyPhotoIndex + 1} of ${media.length}`);
+      } else {
+        element.alt = `${dive.place} · Photo ${storyPhotoIndex + 1} of ${media.length}`;
+      }
+      storyGallery.querySelector("img, video")?.remove();
+      storyGallery.prepend(element);
+      counter.textContent = `${storyPhotoIndex + 1} / ${media.length} · ${item.type === "video" ? "Short" : "Photo"}`;
     };
-    storyGallery.append(image);
-    if (photos.length > 1) {
+    if (media.length > 1) {
       const controls = document.createElement("div");
       controls.className = "dive-gallery-controls";
       const buttons = [-1, 1].map(direction => {
@@ -220,7 +233,7 @@
         button.type = "button";
         button.setAttribute("aria-label", `${direction < 0 ? "Previous" : "Next"} dive photo`);
         button.addEventListener("click", () => {
-          storyPhotoIndex = (storyPhotoIndex + direction + photos.length) % photos.length;
+          storyPhotoIndex = (storyPhotoIndex + direction + media.length) % media.length;
           displayPhoto();
         });
         return button;
@@ -237,29 +250,45 @@
   function makeCard(dive, homepage) {
     const article = document.createElement("article");
     article.className = homepage ? "card" : "destination-card";
-    if (dive.photo) {
-      const photos = dive.photos && dive.photos.length ? dive.photos : [dive.photo];
+    const photos = dive.photos && dive.photos.length ? dive.photos : dive.photo ? [dive.photo] : [];
+    const media = [
+      ...photos.map(url => ({ type: "photo", url })),
+      ...(dive.videos || []).map(url => ({ type: "video", url }))
+    ];
+    if (media.length) {
       let photoIndex = 0;
       const gallery = document.createElement("div");
       gallery.className = "card-gallery";
-      const image = document.createElement("img");
-      image.loading = "lazy";
-      if (!homepage) image.className = "live-dive-photo";
-      gallery.append(image);
+      const displayMedia = () => {
+        const item = media[photoIndex];
+        const element = document.createElement(item.type === "video" ? "video" : "img");
+        element.src = item.url;
+        if (item.type === "video") {
+          element.controls = true;
+          element.playsInline = true;
+          element.preload = "metadata";
+          element.setAttribute("aria-label", `${dive.place} · Short ${photoIndex + 1} of ${media.length}`);
+        } else {
+          element.loading = "lazy";
+          element.alt = `${dive.place} · Photo ${photoIndex + 1} of ${media.length}`;
+          if (!homepage) element.className = "live-dive-photo";
+        }
+        gallery.querySelector("img, video")?.remove();
+        gallery.prepend(element);
+      };
       const counter = text("span", "", "card-photo-count");
       counter.setAttribute("role", "status");
       const displayPhoto = () => {
-        image.src = photos[photoIndex];
-        image.alt = `${dive.place} · Photo ${photoIndex + 1} of ${photos.length}`;
-        counter.textContent = `${photoIndex + 1} / ${photos.length}`;
+        displayMedia();
+        counter.textContent = `${photoIndex + 1} / ${media.length}`;
       };
-      if (photos.length > 1) {
+      if (media.length > 1) {
         [-1, 1].forEach(direction => {
           const button = text("button", direction < 0 ? "‹" : "›", `card-photo-arrow ${direction < 0 ? "previous" : "next"}`);
           button.type = "button";
-          button.setAttribute("aria-label", `${direction < 0 ? "Previous" : "Next"} photo of ${dive.place}`);
+          button.setAttribute("aria-label", `${direction < 0 ? "Previous" : "Next"} dive media of ${dive.place}`);
           button.addEventListener("click", () => {
-            photoIndex = (photoIndex + direction + photos.length) % photos.length;
+            photoIndex = (photoIndex + direction + media.length) % media.length;
             displayPhoto();
           });
           gallery.append(button);
@@ -277,7 +306,7 @@
     button.addEventListener("click", () => showStory(dive));
     heading.append(button);
     body.append(heading, text("p", (dive.highlight || "A dive worth remembering.").slice(0, 180)),
-      text("div", [dive.diver, dive.date, `${(dive.photos || []).length} photos`].filter(Boolean).join(" · "), "meta"));
+      text("div", [dive.diver, dive.date, `${photos.length} photos`, `${(dive.videos || []).length} shorts`].filter(Boolean).join(" · "), "meta"));
     const byline = body.lastElementChild;
     byline.classList.add("member-byline");
     byline.prepend(createMemberAvatar(dive.diver, dive.authorPhoto));
@@ -385,7 +414,7 @@
     if (!countries.has(selectedCountry)) selectedCountry = "";
     const counts = data ? [records.length, countries.size, records.reduce((sum, dive) => sum + (dive.photos || []).length, 0)] : ["—", "—", "—"];
     document.querySelectorAll(".stats strong").forEach((node, index) => { node.textContent = counts[index]; });
-    const featuredRecords = [...records.filter(dive => dive.photo), ...records.filter(dive => !dive.photo)].slice(0, 3);
+    const featuredRecords = [...records.filter(dive => dive.photo || (dive.videos || []).length), ...records.filter(dive => !dive.photo && !(dive.videos || []).length)].slice(0, 3);
     storyGrid.replaceChildren(...featuredRecords.map(dive => makeCard(dive, true)));
     if (!featuredRecords.length) storyGrid.append(text("p", data ? "Your first community story starts with a logged dive." : "Sign in to explore community dive stories.", "editor-note"));
     featuredLive.disabled = !records.length;

@@ -33,6 +33,15 @@
     });
   }
 
+  async function videoUrls(paths) {
+    if (!paths.length) return [];
+    const signed = await result(bucket.createSignedUrls(paths, 3600));
+    return signed.map(item => {
+      if (item.error || !item.signedUrl) throw new Error(item.error || "Could not load a private short.");
+      return item.signedUrl;
+    });
+  }
+
   async function mapProfile(profile) {
     return profile ? { username: profile.username, photo: (await imageUrls(profile.photo_path ? [profile.photo_path] : []))[0] || "" } : null;
   }
@@ -51,7 +60,8 @@
     const base = { ...row, ownerUid: row.owner_id, ownedByCurrentUser: row.owner_id === user.id };
     if (table === "dives") {
       const photos = await imageUrls(row.photo_paths);
-      return { ...base, photos, photo: photos[0] || "", coords: null };
+      const videos = await videoUrls(row.video_paths || []);
+      return { ...base, photos, photo: photos[0] || "", videos, coords: null };
     }
     if (table === "gear") {
       const images = await imageUrls(row.photo_paths);
@@ -93,6 +103,22 @@
     return paths;
   }
 
+  async function uploadShorts(files, prefix, staged) {
+    if (!Array.isArray(files) || files.length > 3) throw new Error("Choose up to 3 short videos.");
+    const paths = [];
+    for (const file of files) {
+      if (!(file instanceof File) || !["video/mp4", "video/webm"].includes(file.type) || file.size > 50 * 1024 * 1024) {
+        throw new Error("Shorts must be MP4 or WebM files no larger than 50 MB.");
+      }
+      const extension = file.type === "video/mp4" ? "mp4" : "webm";
+      const path = `${prefix}/shorts/${crypto.randomUUID()}.${extension}`;
+      await result(bucket.upload(path, file, { contentType: file.type, upsert: false }));
+      staged.push(path);
+      paths.push(path);
+    }
+    return paths;
+  }
+
   async function removeImages(paths) {
     if (paths.length) await result(bucket.remove(paths));
   }
@@ -128,7 +154,7 @@
       if (method === "deleteDive") {
         const removed = await result(client.from("dives").delete().eq("id", String(payload)).eq("owner_id", user.id).select().single());
         committed = true;
-        await removeImages(removed.photo_paths);
+        await removeImages([...removed.photo_paths, ...(removed.video_paths || [])]);
         return true;
       }
       if (method === "voteQuestion") return result(client.rpc("vote_question", { question_id: String(payload) }));
@@ -176,10 +202,13 @@
         const photoPaths = value.replacePhotos
           ? await uploadImages(value.photos, `${user.id}/dives/${id}`, 10, staged)
           : existing ? existing.photo_paths : [];
+        const videoPaths = value.replaceShorts
+          ? await uploadShorts(value.shorts, `${user.id}/dives/${id}`, staged)
+          : existing ? existing.video_paths || [] : [];
         const row = {
           owner_id: user.id, diver: profile.username, place, country, depth,
           flag: clean(value.flag, 8), date: clean(value.date, 10) || new Date().toISOString().slice(0, 10),
-          highlight: clean(value.highlight, 1000), photo_paths: photoPaths
+          highlight: clean(value.highlight, 1000), photo_paths: photoPaths, video_paths: videoPaths
         };
         const request = existing
           ? client.from("dives").update(row).eq("id", id).eq("owner_id", user.id)
@@ -187,6 +216,7 @@
         const saved = await result(request.select().single());
         committed = true;
         if (existing && value.replacePhotos) await removeImages(existing.photo_paths);
+        if (existing && value.replaceShorts) await removeImages(existing.video_paths || []);
         return mapRow("dives", saved, user);
       }
       if (method === "saveGearListing") {
@@ -204,7 +234,7 @@
       }
       throw new Error("Unknown community action.");
     } catch (error) {
-      if (committed) throw new Error(`Your change was saved, but photo processing failed. Refresh before retrying. ${error.message}`);
+      if (committed) throw new Error(`Your change was saved, but media processing failed. Refresh before retrying. ${error.message}`);
       try {
         await removeImages(staged);
       } catch (cleanupError) {
