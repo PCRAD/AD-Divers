@@ -287,7 +287,8 @@
       function renderSelectedShorts() {
         const list = document.getElementById("selected-dive-shorts");
         list.replaceChildren();
-        selectedShorts.forEach(file => {
+        selectedShorts.forEach(clip => {
+          const file = clip.file;
           const row = document.createElement("div");
           row.className = "selected-short-row";
           const name = document.createElement("span");
@@ -299,13 +300,16 @@
           remove.setAttribute("aria-label", `Remove ${file.name}`);
           remove.addEventListener("click", () => {
             if (writingDive) return;
-            selectedShorts = selectedShorts.filter(short => short !== file);
+            selectedShorts = selectedShorts.filter(short => short !== clip);
+            clip.destroy();
             renderSelectedShorts();
             document.getElementById("selected-short-status").textContent = `${file.name} removed. ${selectedShorts.length} shorts selected.`;
             diveForm.elements.shorts.focus();
           });
           row.append(name, remove);
-          list.append(row);
+          clip.element.querySelector(".selected-short-row")?.remove();
+          clip.element.append(row);
+          list.append(clip.element);
         });
         document.getElementById("clear-dive-shorts").hidden = !selectedShorts.length;
       }
@@ -318,6 +322,7 @@
         editingDive = dive;
         diveForm.reset();
         selectedPhotos = [];
+        selectedShorts.forEach(clip => clip.destroy());
         selectedShorts = [];
         renderSelectedPhotos();
         renderSelectedShorts();
@@ -354,6 +359,7 @@
       button.addEventListener("click", () => openDive());
     });
     document.getElementById("close-dive-dialog").addEventListener("click", () => diveDialog.close());
+    document.getElementById("close-dive-dialog-top").addEventListener("click", () => { if (!writingDive) diveDialog.close(); });
     diveDialog.addEventListener("cancel", event => { if (writingDive) event.preventDefault(); });
     diveDialog.addEventListener("close", () => {
       shortSelectionVersion++;
@@ -364,6 +370,7 @@
       thumbnailUrls.forEach(url => URL.revokeObjectURL(url));
       thumbnailUrls = [];
       selectedPhotos = [];
+      selectedShorts.forEach(clip => clip.destroy());
       selectedShorts = [];
       document.getElementById("selected-dive-photos").replaceChildren();
       document.getElementById("selected-dive-shorts").replaceChildren();
@@ -402,9 +409,9 @@
       diveForm.elements.shorts.disabled = true;
       message.textContent = "Checking video type, size, and duration…";
       try {
-        await Promise.all(files.map(validateCommunityShort));
+        const durations = await Promise.all(files.map(file => validateCommunityShort(file, Infinity)));
         if (version !== shortSelectionVersion) return;
-        selectedShorts.push(...files);
+        selectedShorts.push(...files.map((file, index) => createCommunityShortEditor(file, durations[index])));
         renderSelectedShorts();
         message.textContent = `${selectedShorts.length} / 3 shorts selected.`;
       } catch (error) {
@@ -424,6 +431,10 @@
     });
     document.getElementById("clear-dive-shorts").addEventListener("click", () => {
       if (writingDive) return;
+      shortSelectionVersion++;
+      checkingShorts = false;
+      diveForm.elements.shorts.disabled = false;
+      selectedShorts.forEach(clip => clip.destroy());
       selectedShorts = [];
       renderSelectedShorts();
       document.getElementById("selected-short-status").textContent = "Selection cleared. Existing saved shorts are unchanged.";
@@ -458,17 +469,28 @@
         date: diveForm.elements.date.value, depth: diveForm.elements.depth.value,
         highlight: diveForm.elements.highlight.value, flag: editingDive ? editingDive.flag : "",
         replacePhotos: files.length > 0, photos: [],
-        replaceShorts: shorts.length > 0, shorts
+        replaceShorts: shorts.length > 0, shorts: []
       };
       const mainIndex = Number(diveForm.elements.mainPhoto.value);
       writingDive = true;
       diveForm.querySelector('button[type="submit"]').disabled = true;
       document.getElementById("close-dive-dialog").disabled = true;
+      document.getElementById("close-dive-dialog-top").disabled = true;
+      diveForm.elements.shorts.disabled = true;
+      shorts.forEach(clip => clip.setDisabled(true));
       diveMessage.textContent = "Processing media and saving dive…";
       let saved = false;
       try {
         const ordered = files.length ? [files[mainIndex], ...files.filter((_, index) => index !== mainIndex)] : [];
         for (const file of ordered) payload.photos.push(await preparePhoto(file, 1600));
+        for (const [index, clip] of shorts.entries()) {
+          if (version !== authVersion || !currentUser) throw new Error("Your session changed. Sign in and try again.");
+          diveMessage.textContent = `Preparing highlight ${index + 1} of ${shorts.length}…`;
+          payload.shorts.push(await exportCommunityShort(clip, progress => {
+            if (version === authVersion) diveMessage.textContent = `Preparing highlight ${index + 1} of ${shorts.length}: ${Math.round(progress * 100)}%`;
+          }));
+        }
+        diveMessage.textContent = "Uploading media and saving dive…";
         if (version !== authVersion || !currentUser) throw new Error("Your session changed. Sign in and try again.");
         const savedDive = await backend.call("saveDive", payload);
         saved = true;
@@ -486,6 +508,9 @@
         writingDive = false;
         diveForm.querySelector('button[type="submit"]').disabled = false;
         document.getElementById("close-dive-dialog").disabled = false;
+        document.getElementById("close-dive-dialog-top").disabled = false;
+        diveForm.elements.shorts.disabled = false;
+        shorts.forEach(clip => clip.setDisabled(false));
       }
     });
     document.getElementById("cancel-delete-dive").addEventListener("click", () => deleteDialog.close());

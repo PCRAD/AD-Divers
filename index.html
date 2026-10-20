@@ -256,6 +256,7 @@
     .connected-form textarea,.connected-form select { width:100%; padding:11px; font:inherit; }
     .connected-form textarea { min-height:100px; resize:vertical; }
     .dive-photo-preview { width:100%; max-height:180px; object-fit:contain; }
+    #connected-dive-heading { padding-right:28px; }
     #dive-celebration-dialog { text-align:center; padding-top:56px; }
     #garden-nudi-dialog { text-align:center; padding-top:56px; }
     #garden-nudi-name { overflow-wrap:anywhere; font-style:italic; }
@@ -290,6 +291,11 @@
     .selected-photo-row img { width:60px; height:50px; object-fit:cover; border-radius:4px; }
     .selected-short-row { display:flex; align-items:center; gap:12px; margin:10px 0; font-size:12px; }
     .selected-short-row span { flex:1; overflow-wrap:anywhere; min-width:0; }
+    .short-editor { min-width:0; margin:18px 0; padding:14px; border:1px solid var(--line); border-radius:5px; }
+    .short-editor strong { display:block; overflow-wrap:anywhere; margin-bottom:10px; }
+    .short-editor video { display:block; width:100%; max-height:260px; background:#123c47; border-radius:4px; }
+    .short-trim-controls { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:12px; }
+    .short-trim-controls input[type="range"] { padding:8px 0; min-height:44px; accent-color:var(--navy); }
     .live-dive .account-actions { margin-top:16px; }
     .connected-form input[type="checkbox"] { width:auto; }
     .account-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
@@ -610,6 +616,7 @@
     <footer><span>OneAD DIVE COMPASS<br>For the moments between descents.</span><span>Community principle: share generously, credit photographers, respect the ocean.<br>Member photos belong to their respective owners. Dive knowledge is independent educational material, not a substitute for training.</span></footer>
   </main>
   <dialog id="connected-dive-dialog" aria-labelledby="connected-dive-heading">
+    <button class="celebration-close" id="close-dive-dialog-top" type="button" aria-label="Close dive form">&times;</button>
     <h2 id="connected-dive-heading">Log a dive.</h2>
     <form id="connected-dive-form" class="connected-form">
       <label>Dive site<input name="place" required maxlength="120"></label>
@@ -625,8 +632,8 @@
       <p class="editor-note" id="dive-photo-help">Choose photos, then select which one should appear first.</p>
       <label>Main photo<select name="mainPhoto" disabled><option value="0">Select photos first</option></select></label>
       <img id="dive-photo-preview" class="dive-photo-preview" alt="Selected main photo preview" hidden>
-      <label>Short videos (up to 3, MP4/WebM, 10 seconds and 50 MB each)<input name="shorts" type="file" multiple accept="video/mp4,video/webm"></label>
-      <p class="editor-note">Choose clips to add to your selection. Remove a clip, then choose another to replace it. Nothing is uploaded until you save.</p>
+      <label>Videos (up to 3, MP4/WebM, 50 MB each)<input name="shorts" type="file" multiple accept="video/mp4,video/webm"></label>
+      <p class="editor-note">Choose your highlight using Start and End, then preview it. Select any length up to 10 seconds, including a 3 or 4 second moment. Only your selected sequence is uploaded when you save; the original stays on your device. Keep this tab open while preparing clips.</p>
       <div id="selected-dive-shorts" aria-label="Selected short videos"></div>
       <button id="clear-dive-shorts" class="text-button" type="button" hidden>Clear short selection</button>
       <p id="selected-short-status" class="editor-note" role="status"></p>
@@ -922,6 +929,7 @@
   </script>
   <script src="dive-wheel.js"></script>
   <script src="photo-processing.js"></script>
+  <script src="short-editor.js"></script>
   <script src="community-replies.js"></script>
   <script src="member-avatar.js"></script>
   <script src="community-preview.js"></script>

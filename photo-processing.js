@@ -19,7 +19,7 @@ async function prepareCommunityPhoto(file, maximumDimension = 800) {
   }
 }
 
-function validateCommunityShort(file) {
+function validateCommunityShort(file, maximumDuration = 10) {
   if (!["video/mp4", "video/webm"].includes(file.type) || file.size > 50 * 1024 * 1024) {
     return Promise.reject(new Error("Choose an MP4 or WebM short no larger than 50 MB."));
   }
@@ -30,20 +30,24 @@ function validateCommunityShort(file) {
     const finish = error => {
       if (finished) return;
       finished = true;
+      clearTimeout(timeout);
       URL.revokeObjectURL(url);
       video.onloadedmetadata = null;
       video.onerror = null;
       video.removeAttribute("src");
       video.load();
       if (error) reject(error);
-      else resolve(file);
+      else resolve(videoDuration);
     };
+    let videoDuration;
+    const timeout = setTimeout(() => finish(new Error(`Could not read ${file.name} in time. Try another video or reload the page.`)), 30000);
     video.preload = "metadata";
     video.onloadedmetadata = () => {
+      videoDuration = video.duration;
       if (!Number.isFinite(video.duration) || video.duration <= 0) {
         finish(new Error("Could not read the short's duration."));
-      } else if (video.duration > 10) {
-        finish(new Error("Each short must be 10 seconds or shorter."));
+      } else if (video.duration > maximumDuration) {
+        finish(new Error(`Each short must be ${maximumDuration} seconds or shorter.`));
       } else {
         finish();
       }
