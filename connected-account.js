@@ -7,6 +7,7 @@
   const profileDialog = document.getElementById("connected-profile-dialog");
   const authForm = document.getElementById("connected-auth");
   const profileForm = document.getElementById("connected-profile");
+  const passwordForm = document.getElementById("change-password-form");
   const logbookStatus = document.getElementById("logbook-status");
   const dives = document.getElementById("live-dives");
   const divePager = document.getElementById("logbook-pagination");
@@ -192,8 +193,45 @@
   account.addEventListener("click", () => {
     if (currentUser) {
       document.getElementById("profile-status").textContent = "";
+      document.getElementById("profile-email").textContent = currentUser.email || "Email unavailable";
       profileDialog.showModal();
     } else authDialog.showModal();
+  });
+  document.getElementById("show-profile-passwords").addEventListener("change", event => {
+    const type = event.target.checked ? "text" : "password";
+    passwordForm.elements.password.type = type;
+    passwordForm.elements.confirmPassword.type = type;
+  });
+  passwordForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    const message = document.getElementById("password-change-status");
+    const password = passwordForm.elements.password.value;
+    if (password !== passwordForm.elements.confirmPassword.value) {
+      message.textContent = "Passwords do not match.";
+      return;
+    }
+    const version = authVersion;
+    passwordForm.querySelectorAll("button").forEach(button => { button.disabled = true; });
+    message.textContent = "Updating password…";
+    try {
+      if (!currentUser) throw new Error("Sign in again before changing your password.");
+      await backend.changePassword(password);
+      if (version !== authVersion) return;
+      passwordForm.reset();
+      passwordForm.elements.password.type = "password";
+      passwordForm.elements.confirmPassword.type = "password";
+      message.textContent = "Password updated.";
+    } catch (error) {
+      message.textContent = error.message || "Could not update your password.";
+    } finally {
+      passwordForm.querySelectorAll("button").forEach(button => { button.disabled = false; });
+    }
+  });
+  profileDialog.addEventListener("close", () => {
+    passwordForm.reset();
+    passwordForm.elements.password.type = "password";
+    passwordForm.elements.confirmPassword.type = "password";
+    document.getElementById("password-change-status").textContent = "";
   });
   document.getElementById("show-auth-password").addEventListener("change", event => {
     authForm.elements.password.type = event.target.checked ? "text" : "password";
